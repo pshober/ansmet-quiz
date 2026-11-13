@@ -2,9 +2,12 @@
 
 **Play it: <https://planetarypat.com/ansmet-quiz/>**
 
-A photo quiz for ANSMET field teams: is the rock in this field photo a meteorite or an Earth rock,
-and if it's a meteorite, which group? Every photo is an ANSMET field photo taken on the ice at
-collection time, from the [NASA JSC Antarctic Meteorite database](https://www-curator.jsc.nasa.gov/antmet/classdb.cfm).
+An unofficial photo quiz for anyone heading out to search for meteorites in Antarctica: is the rock
+in this field photo a meteorite or an Earth rock, and if it's a meteorite, which group? Every photo
+is an ANSMET field photo taken on the ice at collection time, from the public
+[NASA JSC Antarctic Meteorite database](https://www-curator.jsc.nasa.gov/antmet/classdb.cfm).
+
+This is an independent study aid, not an ANSMET or NASA product, and it doesn't speak for either.
 
 ## Play it
 
