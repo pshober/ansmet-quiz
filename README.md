@@ -67,6 +67,24 @@ so re-runs only fetch what's new. The scraper waits 0.5 s between requests to go
 It also stamps a content hash on the page's `samples.js?v=…` link, because Cloudflare tells browsers to
 cache `.js` files for 4 hours; without the stamp, a browser could pair the new page with an old photo list.
 
+## Tools
+
+Browser tests (`tools/test-harness.html`) load the quiz in a frame, play it automatically with known
+answers, and write what happened to a hidden `out` block. Serve the repo root and dump the page:
+
+```
+python3 -m http.server 8000
+google-chrome --headless=new --virtual-time-budget=120000 --dump-dom \
+  "http://127.0.0.1:8000/tools/test-harness.html?s=learn"
+```
+
+Scenarios: `s=learn`, `s=test` (three tests in a row), `s=adapt&rounds=12` (checks the adaptive mix),
+`s=album` (every album, the viewer, show-all and navigation) and `s=deeplink&hash=album-iron`.
+Each ends with `page errors: none` when all is well.
+
+The link-preview card (`quiz/og-card.jpg`) comes from `tools/og-card.html`: screenshot it at
+1200 x 800 in Chrome and keep the top 1200 x 630.
+
 ## Deploying
 
 Pushing to `main` deploys the `quiz/` folder to GitHub Pages

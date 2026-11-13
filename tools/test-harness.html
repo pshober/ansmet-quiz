@@ -1,0 +1,179 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>harness</title>
+<!-- Browser tests for the quiz: see "Tools" in README.md. Results are written to the hidden "out" block at the bottom. -->
+<style>html,body{margin:0;height:100%;overflow:hidden} iframe{border:0;width:100%;height:100%;display:block}</style>
+<iframe id="f"></iframe>
+<pre id="out" style="display:none"></pre>
+<script>
+const P = new URLSearchParams(location.search);
+const scen = P.get("s") || "learn";
+const f = document.getElementById("f");
+if (P.get("w")) { f.style.width = P.get("w") + "px"; f.style.outline = "1px solid magenta" }
+if (P.get("h")) f.style.height = P.get("h") + "px";
+const out = [];
+const log = (...a) => { out.push(a.join(" ")); document.getElementById("out").textContent = out.join("\n"); };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+window.onerror = (m, src, l) => log("HARNESS ERROR", m, src, l);
+
+f.onload = async () => {
+  const w = f.contentWindow, d = w.document;
+  if (P.get("theme")) d.documentElement.dataset.theme = P.get("theme");
+  const errs = [];
+  w.addEventListener("error", e => errs.push(e.message));
+  const $ = s => d.querySelector(s);
+  const key = k => d.dispatchEvent(new w.KeyboardEvent("keydown", { key: k, bubbles: true }));
+  const SAMP = Object.fromEntries(w.SAMPLES.map(s => [s.id, s]));
+  const cur = () => { const img = $("#photo img"); if (!img) return null; return SAMP[img.getAttribute("src").split("/").pop().replace(/\.\w+$/, "")] };
+  const perfect = s => s.group === "Terrestrial" ? { call: "ter" } : { call: "met", grp: s.group };
+  const shown = [];
+
+  async function answerOne(strategy, testMode) {
+    const s = cur(); if (!s) return false;
+    shown.push(s.group);
+    const dec = strategy(s);
+    (dec.call === "met" ? $("#btnMet") : $("#btnTer")).click();
+    await sleep(0);
+    if (dec.call === "met") {
+      const b = dec.grp ? [...d.querySelectorAll("[data-g]")].find(x => x.dataset.g === dec.grp) : $("#skipBtn");
+      b.click(); await sleep(0);
+    }
+    if ($("#nextBtn")) key("Enter");
+    await sleep(testMode ? 350 : 0);
+    return true;
+  }
+  async function playRound(strategy, testMode) {
+    for (let i = 0; i < 500; i++) {
+      if ($(".end")) return true;
+      if (!(await answerOne(strategy, testMode))) await sleep(10);
+    }
+    return false;
+  }
+  const pick = (mode, len) => { $(mode === "test" ? "#modeTest" : "#modeLearn").click(); if (len) $("#len" + len).click() };
+
+  // ---- album scenarios (run before the quiz reset, which would clear the hash) ----
+  if (scen === "deeplink") {
+    log("deep link", JSON.stringify(w.location.hash), "-> heading:", $(".g-head h2")?.textContent.replace(/\s+/g, " ").trim(), "| tiles:", d.querySelectorAll(".jtile").length, "| current tab:", $('.g-tabs a[aria-current="page"]')?.textContent);
+    log("page errors:", errs.length ? errs.join(" ; ") : "none"); document.title = "DONE"; return;
+  }
+  if (scen === "album") {
+    try {
+      w.localStorage.clear();
+      $(".album-btn").click(); await sleep(50);
+      log("album home: cards", d.querySelectorAll(".album").length, "| heading:", $(".g-head h2")?.textContent, "| hash:", w.location.hash);
+      for (const href of [...d.querySelectorAll(".album")].map(a => a.getAttribute("href"))) {
+        w.location.hash = href.slice(1); await sleep(50);
+        const secs = [...d.querySelectorAll(".g-sec h3")].map(h => h.textContent.replace(/\s+/g, " ").trim());
+        log(` ${href}: ${d.querySelectorAll(".jtile").length} tiles${$("#gAll") ? " (sample; " + $("#gAll").textContent + ")" : ""} | ${secs.join("; ") || "(one section)"}`);
+      }
+      w.location.hash = "album-iron"; await sleep(50);
+      d.querySelectorAll(".jtile")[2].click(); await sleep(50);
+      log("viewer open:", $("#viewer").open, "| count:", $("#vCount").textContent, "| shows:", $("#vInfo .cls")?.textContent);
+      $("#viewer").dispatchEvent(new w.KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })); await sleep(20);
+      log("after ArrowRight:", $("#vCount").textContent);
+      for (let k = 0; k < 5; k++) $("#vPrev").click();
+      await sleep(20);
+      log("after prev x5:", $("#vCount").textContent, "| prev hidden:", $("#vPrev").hidden);
+      const z = $("#vPhoto"); z.dispatchEvent(new w.MouseEvent("click", { bubbles: true, clientX: 300, clientY: 300 })); log("zoom on tap:", z.classList.contains("zoom"));
+      $("#vClose").click(); await sleep(80);
+      log("viewer closed:", !$("#viewer").open, "| hash after close:", w.location.hash, "| seen stored:", JSON.parse(w.localStorage.getItem("dfq.seen") || "[]").length);
+      w.location.hash = "album-carbonaceous-chondrite"; await sleep(50);
+      const before = d.querySelectorAll(".jtile").length; $("#gAll").click(); await sleep(50);
+      log("carbonaceous: show all", before, "->", d.querySelectorAll(".jtile").length);
+      $("#gBack").click(); await sleep(50);
+      log("back to quiz: start screen", !!$("#goBtn"), "| hash:", JSON.stringify(w.location.hash));
+      w.location.hash = "album-lunar"; await sleep(50); $("#gLearn").click(); await sleep(50);
+      log("practise button: in game", !!$("#btnMet"), "| hash:", JSON.stringify(w.location.hash));
+    } catch (e) { log("HARNESS EXCEPTION", e.message, e.stack) }
+    log("page errors:", errs.length ? errs.join(" ; ") : "none"); document.title = "DONE"; return;
+  }
+  if (scen.startsWith("ashot")) {
+    const st = scen.split("-")[1];
+    if (st === "viewer") { d.querySelectorAll(".jtile")[+(P.get("i") || 0)].click() }
+    await sleep(1500);
+    document.title = "DONE"; return;
+  }
+
+  try {
+    w.localStorage.clear(); w.location.hash = "";
+    // re-render start after clearing storage
+    $("#nbReset").click(); $("#nbReset").click();
+    log("samples", w.SAMPLES.length);
+
+    if (scen === "learn") {
+      pick("learn", 10); $("#goBtn").click();
+      const ok = await playRound(s => Math.random() < 0.7 ? perfect(s) : { call: s.group === "Terrestrial" ? "met" : "ter" });
+      log("learn round finished:", ok, "| end h2:", $(".end h2")?.textContent.trim().replace(/\s+/g, " "));
+      log("review cards:", d.querySelectorAll(".miss").length, "| notebook rows:", d.querySelectorAll(".notebook li").length);
+      const m = $(".miss"); if (m) { m.click(); await sleep(0); log("detail open:", $("#detail").open, "| verdict:", $("#detail .verdict")?.textContent); $("#dClose").click(); log("detail closed:", !$("#detail").open) }
+    }
+
+    if (scen === "test") {
+      for (let t = 0; t < 3; t++) {
+        $("#homeBtn")?.click(); await sleep(0);
+        pick("test"); $("#goBtn").click(); await sleep(0);
+        const strat = t === 0 ? (s => Math.random() < 0.6 ? perfect(s) : { call: "ter" }) : perfect;
+        shown.length = 0;
+        const ok = await playRound(strat, true);
+        const counts = {}; shown.forEach(g => counts[g] = (counts[g] || 0) + 1);
+        log(`test ${t + 1} finished:`, ok, "| rocks:", shown.length, "| score:", $(".score")?.textContent, "| band:", $(".band")?.textContent, "| delta:", $(".rank")?.textContent);
+        log("  composition:", JSON.stringify(counts));
+        log("  breakdown rows:", d.querySelectorAll("table.breakdown tbody tr").length, "| review:", d.querySelectorAll(".miss").length, "| sparkline:", !!$(".hist .spark"));
+      }
+      log("stored tests:", JSON.parse(w.localStorage.getItem("dfq.tests")).map(t => t.score).join(","));
+      $("#homeBtn").click(); await sleep(0);
+      log("start records:", $(".records")?.textContent.replace(/\s+/g, " ").trim());
+    }
+
+    if (scen === "adapt") {
+      // Player is perfect on everything except carbonaceous chondrites (always called Earth rocks)
+      // and Earth rocks are perfect. Compare what gets shown early vs late.
+      const strat = s => s.group === "Carbonaceous chondrite" ? { call: "ter" } : perfect(s);
+      const per = [];
+      for (let r = 0; r < +(P.get("rounds") || 12); r++) {
+        if (r === 0) { pick("learn", 40); $("#goBtn").click() } else { $("#againBtn").click() }
+        shown.length = 0; await playRound(strat); per.push([...shown]);
+      }
+      const share = arr => { const c = {}; arr.forEach(g => c[g] = (c[g] || 0) + 1); const m = arr.filter(g => g !== "Terrestrial").length;
+        return Object.fromEntries(Object.entries(c).map(([g, n]) => [g, g === "Terrestrial" ? (n / arr.length * 100).toFixed(0) + "% of all" : (n / m * 100).toFixed(0) + "% of mets"])) };
+      log("first 80 rocks:", JSON.stringify(share(per.slice(0, 2).flat())));
+      log("after round 7:", per.slice(7).flat().length, "rocks", JSON.stringify(share(per.slice(7).flat())));
+      log("notebook:", [...d.querySelectorAll(".notebook li")].map(li => li.textContent.replace(/\s+/g, " ").trim()).join(" | "));
+      const seen = JSON.parse(w.localStorage.getItem("dfq.seen")); log("seen list:", seen.length, "unique:", new Set(seen).size);
+      const all = per.flat(); log("total rocks:", all.length);
+    }
+
+    if (scen.startsWith("shot")) {
+      // build a little history first
+      pick("learn", 10); $("#goBtn").click();
+      await playRound(s => Math.random() < 0.75 ? perfect(s) : { call: s.group === "Terrestrial" ? "met" : "ter" });
+      const st = scen.split("-")[1];
+      if (st === "start") { $("#homeBtn").click() }
+      if (st === "learnend") { /* already there */ }
+      if (st === "testreport") {
+        for (let t = 0; t < 3; t++) { $("#homeBtn").click(); await sleep(0); pick("test"); $("#goBtn").click(); await playRound(s => Math.random() < 0.6 + t * 0.12 ? perfect(s) : { call: "ter" }, true) }
+      }
+      if (st === "detail") { $(".miss")?.click() }
+      if (["guess", "bonus", "reveal", "revealwrong", "testguess"].includes(st)) {
+        $("#homeBtn").click(); await sleep(0); pick(st === "testguess" ? "test" : "learn", 10); $("#goBtn").click(); await sleep(0);
+        if (st === "bonus" || st === "reveal") {
+          // advance until a meteorite comes up
+          while (cur().group === "Terrestrial") { $("#btnTer").click(); await sleep(0); key("Enter"); await sleep(0) }
+          $("#btnMet").click(); await sleep(0);
+          if (st === "reveal") { [...d.querySelectorAll("[data-g]")].find(x => x.dataset.g === cur().group).click() }
+        }
+        if (st === "revealwrong") {
+          while (cur().group !== "Terrestrial") { $("#btnMet").click(); await sleep(0); $("#skipBtn").click(); await sleep(0); key("Enter"); await sleep(0) }
+          $("#btnMet").click(); await sleep(0); $("#skipBtn").click();
+        }
+      }
+      await sleep(600);  // let fonts, images and animations settle
+      const de = d.documentElement;
+      log("overflow-x:", de.scrollWidth, "vs", de.clientWidth, [...d.querySelectorAll("body *")].filter(el => el.getBoundingClientRect().right > de.clientWidth + 1).slice(0, 5).map(el => el.tagName + "." + el.className).join(", "));
+    }
+  } catch (e) { log("HARNESS EXCEPTION", e.message, e.stack) }
+  log("page errors:", errs.length ? errs.join(" ; ") : "none");
+  document.title = "DONE";
+};
+f.src = "../quiz/index.html" + (P.get("hash") ? "#" + P.get("hash") : "");
+</script>
