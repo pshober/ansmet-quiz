@@ -64,6 +64,8 @@ python3 scraper/scrape.py            # options: --ordinary-per-group 60 --seed 1
 
 Needs Python 3 and Pillow. Pages and original photos are cached in `scraper/cache/` (not in git),
 so re-runs only fetch what's new. The scraper waits 0.5 s between requests to go easy on NASA's server.
+It also stamps a content hash on the page's `samples.js?v=…` link, because Cloudflare tells browsers to
+cache `.js` files for 4 hours; without the stamp, a browser could pair the new page with an old photo list.
 
 ## Deploying
 
