@@ -1,4 +1,4 @@
-# Dominion Range Field Quiz
+# Antarctic Meteorite Quiz
 
 **Play it: <https://planetarypat.com/ansmet-quiz/>**
 
