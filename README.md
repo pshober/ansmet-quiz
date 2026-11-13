@@ -21,6 +21,8 @@ Use the link above, or open `quiz/index.html` in a browser. It works offline too
 - **Test mode**: 30 rocks, the same mix every time, no feedback until the end. Scored out of 100
   (2 points per right call, 1 more for naming a meteorite's group), with a per-group breakdown
   and test history.
+- **Review** (end of every round and test): meteorites you missed first, then Earth rocks you
+  bagged, then meteorites you found but named the wrong group. Tap a photo to step through them all.
 - **Field notebook**: recent accuracy per group, across both modes.
 - **How the quiz works** (`#how`): the mix in each mode next to what was really collected at the
   Dominion Range, and how Learn mode adapts. Built from the same settings the quiz uses.

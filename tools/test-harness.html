@@ -26,6 +26,20 @@ f.onload = async () => {
   const SAMP = Object.fromEntries(w.SAMPLES.map(s => [s.id, s]));
   const cur = () => { const img = $("#photo img"); if (!img) return null; return SAMP[img.getAttribute("src").split("/").pop().replace(/\.\w+$/, "")] };
   const perfect = s => s.group === "Terrestrial" ? { call: "ter" } : { call: "met", grp: s.group };
+  // a player who makes all three kinds of mistake: misses, bagged Earth rocks, wrong or skipped groups
+  const mixed = s => { const r = Math.random(); if (r < 0.5) return perfect(s); if (r < 0.75) return { call: s.group === "Terrestrial" ? "met" : "ter" };
+    return s.group === "Terrestrial" ? perfect(s) : r < 0.9 ? { call: "met", grp: s.group === "Iron" ? "Lunar" : "Iron" } : { call: "met" } };
+  const reviewReport = async () => {
+    log("review sections:", [...d.querySelectorAll(".rv-sec h4")].map(h => h.textContent.replace(/\s+/g, " ").trim()).join(" | ") || "(none)");
+    const m = d.querySelectorAll(".miss");
+    if (!m.length) return;
+    m[0].click(); await sleep(20);
+    const first = $("#vInfo .verdict")?.textContent;
+    $("#viewer").dispatchEvent(new w.KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })); await sleep(20);
+    log("viewer:", $("#viewer").open, "| first:", first, "| after ArrowRight:", $("#vInfo .verdict")?.textContent, "|", $("#vCount").textContent);
+    $("#vClose").click(); await sleep(50);
+    log("viewer closed:", !$("#viewer").open);
+  };
   const shown = [];
 
   async function answerOne(strategy, testMode) {
@@ -100,25 +114,33 @@ f.onload = async () => {
     $("#nbReset").click(); $("#nbReset").click();
     log("samples", w.SAMPLES.length);
 
+    if (scen.startsWith("rshot")) {  // screenshot states: a test report with all three review sections
+      pick("test"); $("#goBtn").click(); await playRound(mixed, true);
+      d.querySelector(".review").scrollIntoView();
+      if (scen === "rshot-viewer") d.querySelector(".miss").click();
+      await sleep(1500);
+    }
+
     if (scen === "learn") {
-      pick("learn", 10); $("#goBtn").click();
-      const ok = await playRound(s => Math.random() < 0.7 ? perfect(s) : { call: s.group === "Terrestrial" ? "met" : "ter" });
+      pick("learn", 20); $("#goBtn").click();
+      const ok = await playRound(mixed);
       log("learn round finished:", ok, "| end h2:", $(".end h2")?.textContent.trim().replace(/\s+/g, " "));
       log("review cards:", d.querySelectorAll(".miss").length, "| notebook rows:", d.querySelectorAll(".notebook li").length);
-      const m = $(".miss"); if (m) { m.click(); await sleep(0); log("detail open:", $("#detail").open, "| verdict:", $("#detail .verdict")?.textContent); $("#dClose").click(); log("detail closed:", !$("#detail").open) }
+      await reviewReport();
     }
 
     if (scen === "test") {
       for (let t = 0; t < 3; t++) {
         $("#homeBtn")?.click(); await sleep(0);
         pick("test"); $("#goBtn").click(); await sleep(0);
-        const strat = t === 0 ? (s => Math.random() < 0.6 ? perfect(s) : { call: "ter" }) : perfect;
+        const strat = t === 0 ? mixed : perfect;
         shown.length = 0;
         const ok = await playRound(strat, true);
         const counts = {}; shown.forEach(g => counts[g] = (counts[g] || 0) + 1);
         log(`test ${t + 1} finished:`, ok, "| rocks:", shown.length, "| score:", $(".score")?.textContent, "| band:", $(".band")?.textContent, "| delta:", $(".rank")?.textContent);
         log("  composition:", JSON.stringify(counts));
         log("  breakdown rows:", d.querySelectorAll("table.breakdown tbody tr").length, "| review:", d.querySelectorAll(".miss").length, "| sparkline:", !!$(".hist .spark"));
+        if (t === 0) await reviewReport(); else log("  empty review says:", $(".review .sub")?.textContent.trim());
       }
       log("stored tests:", JSON.parse(w.localStorage.getItem("dfq.tests")).map(t => t.score).join(","));
       $("#homeBtn").click(); await sleep(0);

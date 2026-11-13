@@ -34,6 +34,7 @@
   --stone-ink: #ffffff;
   --good: #1f8a5b;
   --bad: #c0392b;
+  --warn: #9a6412;         /* amber: Earth rocks bagged by mistake */
   --shadow: 0 1px 2px rgba(15,34,48,.08), 0 8px 24px rgba(15,34,48,.08);
   --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
   --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -42,11 +43,11 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --ice: #0b1720; --ice-deep: #1d3242; --surface: #12232f; --ink: #e3eef5; --ink-soft: #93abbb;
   --flag: #ff7148; --flag-ink: #1a0b05; --crust: #000000; --crust-ink: #f4efe9; --stone: #a3927b; --stone-ink: #14110d;
-  --good: #3fc68a; --bad: #ff6b5b; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark } }
+  --good: #3fc68a; --bad: #ff6b5b; --warn: #f2c14e; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark } }
 :root[data-theme="dark"] {
   --ice: #0b1720; --ice-deep: #1d3242; --surface: #12232f; --ink: #e3eef5; --ink-soft: #93abbb;
   --flag: #ff7148; --flag-ink: #1a0b05; --crust: #000000; --crust-ink: #f4efe9; --stone: #a3927b; --stone-ink: #14110d;
-  --good: #3fc68a; --bad: #ff6b5b; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark }
+  --good: #3fc68a; --bad: #ff6b5b; --warn: #f2c14e; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark }
 
 * { box-sizing: border-box }
 [hidden] { display: none !important }
@@ -213,16 +214,20 @@ table.breakdown tr:last-child > * { border-bottom: 0 }
 .miss div { padding: 6px 8px 8px }
 .miss b { display: block; font-size: 13px }
 .tag { display: block; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 2px }
-.tag.bad { color: var(--bad) } .tag.warn { color: var(--flag) }
+.review { display: flex; flex-direction: column; gap: 18px }
+.rv-sec { border-left: 4px solid var(--ice-deep); padding-left: 14px; display: flex; flex-direction: column; gap: 6px }
+.rv-sec h4 { font-family: var(--f-display); font-size: 21px; font-weight: 700; text-transform: uppercase; margin: 0; display: flex; gap: 10px; align-items: center }
+.rv-sec h4 span { font-family: var(--f-body); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 1px 9px; background: var(--ice-deep); color: var(--ink); font-variant-numeric: tabular-nums }
+.end .rv-sec .sub { margin: 0 0 4px }
+.rv-bad { border-left-color: var(--bad) } .rv-bad h4 span { background: var(--bad); color: var(--surface) } .rv-bad .tag { color: var(--bad) }
+.rv-warn { border-left-color: var(--warn) } .rv-warn h4 span { background: var(--warn); color: var(--surface) } .rv-warn .tag { color: var(--warn) }
+.rv-soft .tag { color: var(--ink-soft) }
+.v-verdict { border-left: 4px solid var(--ice-deep); padding-left: 12px }
+.v-verdict.rv-bad .verdict { color: var(--bad) } .v-verdict.rv-warn .verdict { color: var(--warn) } .v-verdict.rv-soft .verdict { color: var(--ink) }
 .end-actions { display: flex; gap: 10px; flex-wrap: wrap }
 .ghost { border: 1px solid var(--ice-deep); background: var(--surface); padding: 10px 18px; border-radius: 6px; font-weight: 500 }
 
 /* Review dialog */
-dialog.detail { border: 0; border-radius: 10px; padding: 0; width: min(980px, calc(100vw - 32px)); max-width: none; background: var(--ice); color: var(--ink); box-shadow: var(--shadow) }
-dialog.detail::backdrop { background: rgba(5,15,22,.65) }
-.detail-body { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 16px; padding: 16px; max-height: calc(100vh - 48px); overflow: auto }
-.detail-body .photo { max-height: calc(100vh - 80px) }
-.detail-close { position: absolute; top: 10px; right: 10px; z-index: 2; background: var(--ink); color: var(--ice); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 600 }
 
 /* Album: browse field photos by meteorite type */
 .start-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center }
@@ -292,7 +297,7 @@ footer { font-size: 12px; color: var(--ink-soft); max-width: 90ch }
 footer a { color: inherit }
 
 @media (max-width: 760px) {
-  .start, .play, .end-top, .detail-body { grid-template-columns: minmax(0,1fr) }
+  .start, .play, .end-top { grid-template-columns: minmax(0,1fr) }
   .photo { aspect-ratio: 1; max-height: 62vh }
   .brand h1 { font-size: 22px }
   .jgrid { --rowh: 118px; gap: 4px }
@@ -339,7 +344,6 @@ footer a { color: inherit }
     come from every ANSMET icefield. This is an unofficial study aid, not an ANSMET or NASA product.</footer>
 </div>
 
-<dialog class="detail" id="detail" aria-label="Sample details"></dialog>
 
 <dialog class="viewer" id="viewer" aria-label="Photo viewer" tabindex="-1">
   <div class="v-wrap">
@@ -575,31 +579,39 @@ function wirePhoto(p) {
   };
 }
 function preload(s) { if (s) { const im = new Image(); im.src = s.image } }
-function reviewHTML(entries) {
-  S.review = entries;
-  return `<div class="misses">${entries.map((l, i) => `
-    <button type="button" class="miss" data-i="${i}">
-      <img src="${esc(thumbOf(l.s))}" alt="Field photo of ${esc(l.s.name)}" loading="lazy">
-      <div><span class="tag ${l.right ? "warn" : "bad"}">${esc(missLabel(l))}</span><b>${esc(l.s.classification)}</b>${esc(l.s.name)}</div>
-    </button>`).join("")}</div>`;
+// Review: misses grouped by how much they matter on the ice. Tapping a photo opens the viewer on it,
+// and the arrows step through the whole review in this order.
+const REVIEW_KINDS = [
+  { cls: "bad", title: "Meteorites you missed", note: "You called these Earth rocks, so they'd have been left on the ice. These matter most.", match: l => l.isMet && !l.right },
+  { cls: "warn", title: "Earth rocks you bagged", note: "You called these meteorites.", match: l => !l.isMet && !l.right },
+  { cls: "soft", title: "Right call, wrong group", note: "You found the meteorite but named the wrong group, or skipped naming it.", match: l => l.isMet && l.right && !l.grpRight }
+];
+function reviewInfo(l) {  // [card tag, viewer heading, viewer line]
+  if (l.isMet && !l.right) return [groupLabel(l.s.group), "Missed meteorite", "You called it an Earth rock, so it would have been left on the ice."];
+  if (!l.right) return ["Earth rock", "Bagged an Earth rock", "You called it a meteorite."];
+  return l.grp ? [`You said ${l.grp}`, "Wrong group", `You found it but called it ${l.grp}. It's ${l.s.group}.`]
+    : ["Group skipped", "Group skipped", `You found it but didn't name the group. It's ${l.s.group}.`];
 }
-function missLabel(l) {
-  if (!l.right) return l.isMet ? "Missed meteorite" : "Bagged an Earth rock";
-  return l.grp ? `You said ${l.grp}` : "Group skipped";
+function reviewHTML(L, extra = "") {
+  const secs = REVIEW_KINDS.map(k => ({ ...k, items: L.filter(k.match) })).filter(k => k.items.length);
+  S.review = secs.flatMap(k => k.items);
+  if (!secs.length) return `<div class="review"><h3>Review</h3><p class="sub">Nothing to review: every call right and every group named. ${esc(extra)}</p></div>`;
+  let i = 0;
+  return `<div class="review"><div><h3>Review</h3><p class="sub">Most important first. Tap a photo to see it large, then use the arrows to go through them all. ${esc(extra)}</p></div>
+    ${secs.map(k => `<section class="rv-sec rv-${k.cls}">
+      <h4>${esc(k.title)} <span>${k.items.length}</span></h4><p class="sub">${esc(k.note)}</p>
+      <div class="misses">${k.items.map(l => `
+        <button type="button" class="miss" data-i="${i++}">
+          <img src="${esc(thumbOf(l.s))}" alt="Field photo of ${esc(l.s.name)}" loading="lazy">
+          <div><span class="tag">${esc(reviewInfo(l)[0])}</span><b>${esc(l.s.classification)}</b>${esc(l.s.name)}</div>
+        </button>`).join("")}</div>
+    </section>`).join("")}</div>`;
 }
-function wireReview() { app.querySelectorAll(".miss").forEach(b => b.onclick = () => openDetail(S.review[+b.dataset.i])) }
-function openDetail(e) {
-  const d = $("#detail");
-  const [v, sub] = verdictOf(e);
-  d.innerHTML = `<button type="button" class="detail-close" id="dClose">Close</button>
-    <div class="detail-body">${photoHTML(e.s, "dPhoto")}
-      <div class="result ${e.right ? "" : "wrong"}"><div><div class="verdict">${esc(v)}</div><div class="verdict-sub">${esc(sub)}</div></div>${factsHTML(e.s)}</div>
-    </div>`;
-  wirePhoto($("#dPhoto"));
-  $("#dClose").onclick = () => d.close();
-  d.onclick = ev => { if (ev.target === d) d.close() };
-  if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", "");
+function reviewVerdict(l) {
+  const [, head, line] = reviewInfo(l), cls = l.isMet && !l.right ? "bad" : !l.right ? "warn" : "soft";
+  return `<div class="v-verdict rv-${cls}"><div class="verdict">${esc(head)}</div><div class="verdict-sub">${esc(line)}</div></div>`;
 }
+function wireReview() { app.querySelectorAll(".miss").forEach(b => b.onclick = () => openViewer(S.review.map(l => l.s), +b.dataset.i, S.review)) }
 
 // ---- Game ------------------------------------------------------------------------------------
 let S = null, phase = "start";
@@ -627,7 +639,6 @@ function recordsHTML() {
 
 function startScreen() {
   phase = "start"; S = null; $("#hud").hidden = true;
-  if ($("#detail").open) $("#detail").close();
   const order = shuffle([...shuffle([...METS]).slice(0, 2), ...shuffle([...TERR]).slice(0, 1)]);
   app.innerHTML = `
   <section class="start">
@@ -804,7 +815,6 @@ function learnEnd() {
     : acc >= 75 ? "Field-worthy. A few more rounds and nothing gets past you."
     : acc >= 55 ? "Getting there. Study the misses below. Fusion crust is the key."
     : "The ice is tricky. Review the misses and run another round.";
-  const review = L.filter(l => !l.right || (l.isMet && !l.grpRight));
   app.innerHTML = `
   <section class="end">
     <div class="end-top">
@@ -816,7 +826,7 @@ function learnEnd() {
         <div class="stat ${bagged ? "warn" : ""}"><b>${bagged}</b><span>Earth rocks bagged</span></div>
       </div>
     </div>
-    ${review.length ? `<div><h3>Review</h3><p class="sub">Misses and group mix-ups. Tap a photo to see what it was. Groups named this round: ${named} of ${metRight.length}.</p>${reviewHTML(review)}</div>` : ""}
+    ${reviewHTML(L, metRight.length ? `Groups named this round: ${named} of ${metRight.length}.` : "")}
     ${notebookHTML()}
     <div class="end-actions"><button class="go" id="againBtn" type="button">Another round</button><a class="ghost" href="#album">See the meteorites</a><button class="ghost" id="homeBtn" type="button">Back to start</button></div>
   </section>`;
@@ -849,7 +859,6 @@ function testReport() {
     return `<tr><th scope="row">${esc(groupLabel(g))}</th><td class="${r === ls.length ? "ok-txt" : "bad-txt"}">${r} of ${ls.length}</td>
       <td>${g === "Terrestrial" ? "–" : `${nm} of ${ls.length}`}</td></tr>`;
   }).join("");
-  const review = L.filter(l => !l.right || (l.isMet && !l.grpRight));
   app.innerHTML = `
   <section class="end">
     <div class="end-top">
@@ -869,7 +878,7 @@ function testReport() {
     </div>
     <div><h3>By group</h3><p class="sub">Right call means you bagged a meteorite or left an Earth rock behind.</p>
       <div class="table-wrap"><table class="breakdown"><thead><tr><th scope="col">Group</th><th scope="col">Right call</th><th scope="col">Group named</th></tr></thead><tbody>${rows}</tbody></table></div></div>
-    ${review.length ? `<div><h3>Review</h3><p class="sub">Every miss and group mix-up from this test. Tap a photo to see what it was.</p>${reviewHTML(review)}</div>` : ""}
+    ${reviewHTML(L)}
     ${notebookHTML()}
     <div class="end-actions"><button class="go" id="againBtn" type="button">Take another test</button><a class="ghost" href="#album">See the meteorites</a><button class="ghost" id="homeBtn" type="button">Back to start</button></div>
   </section>`;
@@ -993,8 +1002,8 @@ function albumView(g) {
 // Photo viewer: arrows or swipe to move, tap to zoom. Opening a photo counts as "seen", so the
 // quiz then prefers photos you haven't studied. On phones, the back button closes the viewer.
 const V = { list: [], i: 0, sx: 0, sy: 0, swiped: false, popping: false };
-function openViewer(list, i) {
-  V.list = list; V.i = i; showViewer();
+function openViewer(list, i, entries) {
+  V.list = list; V.i = i; V.entries = entries || null; showViewer();
   const d = $("#viewer");
   if (d.open) return;
   history.pushState({ viewer: 1 }, "", location.href);
@@ -1007,7 +1016,7 @@ function showViewer() {
   $("#vPhoto").classList.remove("zoom");
   img.src = s.image; img.alt = `Field photo of ${s.name}, ${s.classification}`;
   $("#vCount").textContent = `${V.i + 1} / ${V.list.length}`;
-  $("#vInfo").innerHTML = factsHTML(s);
+  $("#vInfo").innerHTML = (V.entries ? reviewVerdict(V.entries[V.i]) : "") + factsHTML(s);
   $("#vPrev").hidden = V.i <= 0; $("#vNext").hidden = V.i >= V.list.length - 1;
   markSeen(s);
   preload(V.list[V.i + 1]); preload(V.list[V.i - 1]);
@@ -1036,7 +1045,7 @@ function stepViewer(d) { const j = V.i + d; if (j >= 0 && j < V.list.length) { V
   d.addEventListener("close", () => {
     if (!V.popping && history.state && history.state.viewer) history.back();
     V.popping = false;
-    const t = app.querySelector(`.jtile[data-i="${V.i}"]`); if (t) t.focus();
+    const t = app.querySelector(`.jtile[data-i="${V.i}"], .miss[data-i="${V.i}"]`); if (t) t.focus();
   });
   window.addEventListener("popstate", () => { if (d.open) { V.popping = true; d.close() } });
 })();
@@ -1107,7 +1116,7 @@ $("#quitBtn").onclick = () => {
 };
 
 document.addEventListener("keydown", e => {
-  if (e.metaKey || e.ctrlKey || e.altKey || $("#detail").open || $("#viewer").open) return;
+  if (e.metaKey || e.ctrlKey || e.altKey || $("#viewer").open) return;
   const k = e.key.toLowerCase();
   if (phase === "guess") { if (k === "m") call("met"); else if (k === "e" || k === "t") call("ter") }
   else if (phase === "bonus") {
