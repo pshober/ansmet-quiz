@@ -18,6 +18,15 @@ Use the link above, or open `quiz/index.html` in a browser. It works offline too
   (2 points per right call, 1 more for naming a meteorite's group), with a per-group breakdown
   and test history.
 - **Field notebook**: recent accuracy per group, across both modes.
+- **See the meteorites**: a photo album for each meteorite type (and Earth rocks), grouped by
+  subtype, e.g. pallasites vs mesosiderites. Tap a photo for a large view with the curator's notes;
+  arrows or swipe to move through the album. The common types open on a representative 60 photos
+  that cover every subtype (with "Show all"); rarer types show every photo. Each album has its own
+  link to share, e.g. <https://planetarypat.com/ansmet-quiz/#album-iron>. Photos opened in the album
+  count as seen, so the quiz prefers photos you haven't studied.
+
+Progress (notebook, scores, photos seen) is stored in each player's own browser on their own device.
+Nothing is sent anywhere, so every team member has their own, and it doesn't sync between devices.
 
 ## What's in the photo pool
 
@@ -26,13 +35,15 @@ Built by `scraper/scrape.py`:
 - every terrestrial rock from the Dominion Range (DOM) and nearby icefields: Miller Range (MIL),
   MacAlpine Hills (MAC), Lewis Cliff (LEW), Grosvenor Mountains (GRO), Queen Alexandra Range (QUE)
 - every non-ordinary-chondrite meteorite from those same sites
+- every iron, stony-iron, lunar and Martian meteorite from **any** ANSMET icefield (they look the
+  same wherever they're found, and they're rare), via the database's by-type tables
 - 60 each of H, L and LL ordinary chondrites from DOM (random, `--seed 1`)
 
 Only field photos are used (no lab or thin-section photos), resized to 900 px WebP (~45 KB each).
 Samples without a field photo are skipped. The pool is large on purpose, so players learn the
-features rather than memorising individual photos. Current pool: 1,073 photos (143 Earth rocks,
-171 ordinary chondrites, 508 carbonaceous, 122 HED, 42 enstatite, 33 other achondrites, 24 irons,
-14 lunar, 12 stony-irons, 4 Martian).
+features rather than memorising individual photos. Current pool: 1,198 photos (143 Earth rocks,
+171 ordinary chondrites, 508 carbonaceous, 122 HED, 99 irons, 43 stony-irons, 42 enstatite,
+33 other achondrites, 26 lunar, 11 Martian).
 
 ## Tuning the mix
 

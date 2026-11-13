@@ -224,6 +224,63 @@ dialog.detail::backdrop { background: rgba(5,15,22,.65) }
 .detail-body .photo { max-height: calc(100vh - 80px) }
 .detail-close { position: absolute; top: 10px; right: 10px; z-index: 2; background: var(--ink); color: var(--ice); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 600 }
 
+/* Album: browse field photos by meteorite type */
+.start-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center }
+.album-btn { display: inline-flex; align-items: center; gap: 10px; border: 2px solid var(--ink); color: var(--ink); text-decoration: none; font-family: var(--f-display); font-weight: 700; font-size: 22px; letter-spacing: .04em; text-transform: uppercase; padding: 10px 20px; border-radius: 6px }
+.album-btn:hover { background: var(--ink); color: var(--ice) }
+a.ghost { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center }
+.gallery { display: flex; flex-direction: column; gap: 18px }
+.g-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap }
+.g-head h2 { font-family: var(--f-display); font-weight: 800; font-size: clamp(38px, 5.5vw, 60px); line-height: .92; text-transform: uppercase; margin: 0 0 10px; text-wrap: balance }
+.g-head h2 small { font-size: .4em; color: var(--ink-soft); font-weight: 700; letter-spacing: .02em; margin-left: 10px; white-space: nowrap }
+.g-intro { color: var(--ink-soft); max-width: 62ch; margin: 0 }
+.g-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin }
+.g-tabs a { flex: none; border: 1px solid var(--ice-deep); background: var(--surface); color: var(--ink); text-decoration: none; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; white-space: nowrap }
+.g-tabs a:hover { border-color: var(--flag) }
+.g-tabs a[aria-current="page"] { background: var(--ink); color: var(--ice); border-color: var(--ink) }
+.g-tip { max-width: 75ch }
+.g-note { font-size: 13px; color: var(--ink-soft); margin: 0; display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline }
+.linkish { color: var(--flag); text-decoration: underline; font-weight: 600; font-size: 13px }
+.albums { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px }
+.album { display: flex; flex-direction: column; background: var(--surface); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); color: var(--ink); text-decoration: none }
+.album:hover { outline: 2px solid var(--flag) }
+.album-cover { display: block; aspect-ratio: 4/3; background: var(--crust); overflow: hidden }
+.album-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s ease }
+.album:hover .album-cover img { transform: scale(1.04) }
+.album-meta { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px }
+.album-meta strong { font-family: var(--f-display); font-size: 21px; font-weight: 700; text-transform: uppercase; line-height: 1.05 }
+.album-meta > span { font-size: 12px; color: var(--ink-soft) }
+.album-meta .n { color: var(--flag); font-weight: 600; font-variant-numeric: tabular-nums }
+.g-sec h3 { font-family: var(--f-display); font-size: 22px; font-weight: 700; text-transform: uppercase; margin: 6px 0 8px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap }
+.g-sec h3 span { font-family: var(--f-body); font-size: 12px; font-weight: 500; color: var(--ink-soft); text-transform: none }
+.jgrid { --rowh: 190px; display: flex; flex-wrap: wrap; gap: 6px }
+.jgrid::after { content: ""; flex-grow: 1000000 }
+.jtile { position: relative; padding: 0; border-radius: 4px; overflow: hidden; background: var(--crust); min-width: 0 }
+.jtile i { display: block }
+.jtile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s ease }
+.jtile:hover img { transform: scale(1.03) }
+.jcap { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 8px 6px; background: linear-gradient(transparent, rgba(0,0,0,.72)); color: #fff; font-size: 12px; line-height: 1.3; text-align: left; opacity: 0; transition: opacity .2s ease; pointer-events: none }
+.jtile:hover .jcap, .jtile:focus-visible .jcap { opacity: 1 }
+.g-foot { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 6px }
+
+/* Photo viewer: dark stage for the photo, details alongside (below on phones) */
+dialog.viewer { border: 0; padding: 0; margin: 0; width: 100vw; height: 100vh; max-width: none; max-height: none; background: #05090c; color: #e3eef5; overflow: hidden }
+dialog.viewer::backdrop { background: #05090c }
+dialog.viewer:focus { outline: none }
+.v-wrap { display: grid; grid-template-columns: minmax(0,1fr) minmax(300px, 380px); height: 100% }
+.v-stage { position: relative; min-width: 0; min-height: 0 }
+.v-photo { position: absolute; inset: 0; overflow: hidden; touch-action: pan-y }
+.v-photo img { width: 100%; height: 100%; object-fit: contain; display: block; transition: transform .25s ease; cursor: zoom-in; user-select: none; -webkit-user-drag: none }
+.v-photo.zoom img { transform: scale(2.2); cursor: zoom-out }
+.v-nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,.14); color: #fff; display: flex; align-items: center; justify-content: center }
+.v-nav:hover { background: rgba(255,255,255,.28) }
+.v-prev { left: max(12px, env(safe-area-inset-left, 0px)) }
+.v-next { right: 12px }
+.v-count { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); top: max(12px, env(safe-area-inset-top, 0px)); z-index: 2; background: rgba(0,0,0,.55); color: #fff; font-family: var(--f-mono); font-size: 12px; padding: 3px 8px; border-radius: 4px }
+.v-info { background: var(--surface); color: var(--ink); overflow-y: auto; padding: 60px 20px 24px; display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.v-close { position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); z-index: 3; background: var(--ink); color: var(--ice); border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 600 }
+body:has(dialog[open]) { overflow: hidden }
+
 footer { font-size: 12px; color: var(--ink-soft); max-width: 90ch }
 footer a { color: inherit }
 
@@ -231,6 +288,14 @@ footer a { color: inherit }
   .start, .play, .end-top, .detail-body { grid-template-columns: minmax(0,1fr) }
   .photo { aspect-ratio: 1; max-height: 62vh }
   .brand h1 { font-size: 22px }
+  .jgrid { --rowh: 118px; gap: 4px }
+  .albums { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px }
+  .album-meta strong { font-size: 18px }
+  dialog.viewer { overflow-y: auto }
+  .v-wrap { grid-template-columns: minmax(0,1fr); grid-template-rows: min(64vh, 80vw) auto; height: auto; min-height: 100% }
+  .v-stage { margin-top: calc(52px + env(safe-area-inset-top, 0px)) }
+  .v-info { padding: 16px max(16px, env(safe-area-inset-right, 0px)) 28px max(16px, env(safe-area-inset-left, 0px)) }
+  .v-nav { width: 40px; height: 40px }
 }
 @media (max-width: 480px) {
   .modes { grid-template-columns: minmax(0,1fr) }
@@ -262,11 +327,25 @@ footer a { color: inherit }
 
   <footer>Field photos courtesy of the ANSMET program (Case Western Reserve University and the University of Utah), via the
     <a href="https://www-curator.jsc.nasa.gov/antmet/classdb.cfm" target="_blank" rel="noopener">NASA JSC Antarctic Meteorite database</a>.
-    Samples come from the Dominion Range (DOM) and nearby icefields: Miller Range (MIL), MacAlpine Hills (MAC), Lewis Cliff (LEW),
-    Grosvenor Mountains (GRO) and Queen Alexandra Range (QUE).</footer>
+    Earth rocks and most meteorites come from the Dominion Range (DOM) and nearby icefields: Miller Range (MIL), MacAlpine Hills (MAC),
+    Lewis Cliff (LEW), Grosvenor Mountains (GRO) and Queen Alexandra Range (QUE). Irons, stony-irons, lunar and Martian meteorites
+    come from every ANSMET icefield.</footer>
 </div>
 
 <dialog class="detail" id="detail" aria-label="Sample details"></dialog>
+
+<dialog class="viewer" id="viewer" aria-label="Photo viewer" tabindex="-1">
+  <div class="v-wrap">
+    <div class="v-stage">
+      <div class="v-photo" id="vPhoto"><img id="vImg" alt=""></div>
+      <span class="v-count" id="vCount"></span>
+      <button type="button" class="v-nav v-prev" id="vPrev" aria-label="Previous photo"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button type="button" class="v-nav v-next" id="vNext" aria-label="Next photo"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="v-info" id="vInfo"></div>
+  </div>
+  <button type="button" class="v-close" id="vClose">Close</button>
+</dialog>
 
 <script src="samples.js"></script>
 <script>
@@ -547,7 +626,10 @@ function startScreen() {
         </div>
       </div>
       <ul class="how" id="howList">${howHTML()}</ul>
-      <button class="go" id="goBtn" type="button">${mode === "test" ? "Start test" : "Start learning"}</button>
+      <div class="start-actions">
+        <button class="go" id="goBtn" type="button">${mode === "test" ? "Start test" : "Start learning"}</button>
+        <a class="album-btn" href="#album">${ALBUM_ICON}See the meteorites</a>
+      </div>
       <div class="records">${recordsHTML()}</div>
       <p class="keys">Keys: <kbd>M</kbd> meteorite · <kbd>E</kbd> Earth rock · <kbd>1</kbd>–<kbd>${GROUPS.length}</kbd> group · <kbd>0</kbd> skip · <kbd>Enter</kbd> next</p>
       <p class="pool">${METS.length} meteorites and ${TERR.length} Earth rocks in the photo pool.</p>
@@ -711,7 +793,7 @@ function learnEnd() {
     </div>
     ${review.length ? `<div><h3>Review</h3><p class="sub">Misses and group mix-ups. Tap a photo to see what it was. Groups named this round: ${named} of ${metRight.length}.</p>${reviewHTML(review)}</div>` : ""}
     ${notebookHTML()}
-    <div class="end-actions"><button class="go" id="againBtn" type="button">Another round</button><button class="ghost" id="homeBtn" type="button">Back to start</button></div>
+    <div class="end-actions"><button class="go" id="againBtn" type="button">Another round</button><a class="ghost" href="#album">See the meteorites</a><button class="ghost" id="homeBtn" type="button">Back to start</button></div>
   </section>`;
   wireReview(); wireNotebook();
   $("#againBtn").onclick = newGame; $("#homeBtn").onclick = startScreen;
@@ -764,12 +846,185 @@ function testReport() {
       <div class="table-wrap"><table class="breakdown"><thead><tr><th scope="col">Group</th><th scope="col">Right call</th><th scope="col">Group named</th></tr></thead><tbody>${rows}</tbody></table></div></div>
     ${review.length ? `<div><h3>Review</h3><p class="sub">Every miss and group mix-up from this test. Tap a photo to see what it was.</p>${reviewHTML(review)}</div>` : ""}
     ${notebookHTML()}
-    <div class="end-actions"><button class="go" id="againBtn" type="button">Take another test</button><button class="ghost" id="homeBtn" type="button">Back to start</button></div>
+    <div class="end-actions"><button class="go" id="againBtn" type="button">Take another test</button><a class="ghost" href="#album">See the meteorites</a><button class="ghost" id="homeBtn" type="button">Back to start</button></div>
   </section>`;
   wireReview(); wireNotebook();
   $("#againBtn").onclick = newGame; $("#homeBtn").onclick = startScreen;
   $("#hud").hidden = true; window.scrollTo(0, 0);
 }
+
+// ---- Album: browse field photos by type -------------------------------------------------------
+// The common types open on a representative sample that covers every subtype, with "Show all" for the
+// rest; rarer types always show every photo. Each album has its own link (#album-iron etc.) to share.
+const ALBUM_SAMPLE = 60;
+const SAMPLED_ALBUMS = new Set(["Ordinary chondrite", "Carbonaceous chondrite", "HED achondrite", "Terrestrial"]);
+const ALBUMS = [...GROUPS, ...(TERR.length ? ["Terrestrial"] : [])];
+const albumSlug = g => g === "Terrestrial" ? "earth-rocks" : g.toLowerCase().replace(/[^a-z]+/g, "-");
+const SLUG2G = Object.fromEntries(ALBUMS.map(g => [albumSlug(g), g]));
+const albumShowAll = new Set();
+const hashId = id => { let h = 2166136261; for (let i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = Math.imul(h, 16777619) } return h >>> 0 };
+const ALBUM_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="1" y="1" width="8" height="8" rx="2" fill="currentColor"/><rect x="11" y="1" width="8" height="8" rx="2" fill="currentColor" opacity=".55"/><rect x="1" y="11" width="8" height="8" rx="2" fill="currentColor" opacity=".55"/><rect x="11" y="11" width="8" height="8" rx="2" fill="currentColor"/></svg>`;
+
+// Subtype used for the album's sections (e.g. pallasites vs mesosiderites).
+function subclassOf(s) {
+  const c = s.classification;
+  switch (s.group) {
+    case "Ordinary chondrite": { const m = c.match(/^(LL|L|H)(?=[\s\d-]|$)/); return m ? `${m[1]} chondrites` : "Other ordinary chondrites" }
+    case "Carbonaceous chondrite": { if (/ungr/i.test(c)) return "Ungrouped"; const m = c.match(/^C([A-Z]{1,2})/); return m ? `C${m[1]} chondrites` : "Other carbonaceous" }
+    case "Enstatite chondrite": { const m = c.match(/^E([HL])/); return m ? `E${m[1]} chondrites` : "Other enstatite" }
+    case "HED achondrite": return /^howard/i.test(c) ? "Howardites" : /^diogen/i.test(c) ? "Diogenites" : "Eucrites";
+    case "Iron": { if (/ungr/i.test(c)) return "Ungrouped irons"; const m = c.match(/Iron[-\s]+([IVX]+[A-Z]*)/); return m ? `${m[1]} irons` : "Other irons" }
+    case "Stony-iron": return /pallas/i.test(c) ? "Pallasites" : "Mesosiderites";
+    case "Lunar": {
+      if (!/breccia/i.test(c)) return /basalt/i.test(c) ? "Lunar basalts" : "Other lunar rocks";
+      return /anorth/i.test(c) ? "Anorthositic breccias" : /basalt/i.test(c) ? "Basaltic breccias" : "Polymict breccias";
+    }
+    case "Martian": return /nakhl/i.test(c) ? "Nakhlites" : /sherg/i.test(c) ? "Shergottites" : /chass/i.test(c) ? "Chassignites" : "Orthopyroxenites";
+    case "Other achondrite": { if (/ungr/i.test(c)) return "Ungrouped"; const m = c.match(/^[A-Za-z]+/); return m ? m[0][0].toUpperCase() + m[0].slice(1).toLowerCase() + "s" : "Other" }
+    default: return groupLabel(s.group);
+  }
+}
+function albumPhotos(g) {
+  const all = ALL.filter(s => s.group === g).sort((a, b) => hashId(a.id) - hashId(b.id));
+  if (albumShowAll.has(g) || !SAMPLED_ALBUMS.has(g) || all.length <= ALBUM_SAMPLE) return { photos: all, total: all.length };
+  const bySub = new Map();
+  for (const s of all) { const k = subclassOf(s); if (!bySub.has(k)) bySub.set(k, []); bySub.get(k).push(s) }
+  const lists = [...bySub.values()], photos = [];
+  for (let i = 0; photos.length < ALBUM_SAMPLE; i++) {  // round-robin, so small subtypes still show up
+    let any = false;
+    for (const l of lists) if (i < l.length && photos.length < ALBUM_SAMPLE) { photos.push(l[i]); any = true }
+    if (!any) break;
+  }
+  return { photos, total: all.length };
+}
+function albumTabs(cur) {
+  return `<nav class="g-tabs" aria-label="Albums"><a href="#album"${cur ? "" : ' aria-current="page"'}>All albums</a>${ALBUMS.map(g =>
+    `<a href="#album-${albumSlug(g)}"${g === cur ? ' aria-current="page"' : ""}>${esc(groupLabel(g))}</a>`).join("")}</nav>`;
+}
+function tileHTML(s, i) {
+  const ar = s.w && s.h ? s.w / s.h : 0.77;
+  return `<button type="button" class="jtile" data-i="${i}" style="flex:${(ar * 100).toFixed(1)} 1 calc(${ar.toFixed(3)} * var(--rowh))">
+    <i style="padding-bottom:${(100 / ar).toFixed(2)}%"></i>
+    <img src="${esc(s.image)}" alt="Field photo of ${esc(s.name)}, ${esc(s.classification)}" loading="${i < 16 ? "eager" : "lazy"}" decoding="async">
+    <span class="jcap">${esc(s.classification)}<br>${esc(s.name)}</span></button>`;
+}
+function leaveAlbum() {
+  if (location.hash) history.pushState(null, "", location.pathname + location.search);
+  startScreen();
+}
+function albumHome() {
+  phase = "album"; S = null; $("#hud").hidden = true;
+  app.innerHTML = `
+  <section class="gallery">
+    <div class="g-top"><button type="button" class="ghost" id="gBack">← Back to the quiz</button></div>
+    <div class="g-head">
+      <h2>See the meteorites</h2>
+      <p class="g-intro">Field photos of each kind of meteorite, as the teams found them on the ice. Open an album, then tap a photo to see it large with the curator's notes. Earth rocks are here too, so you can compare the look-alikes.</p>
+    </div>
+    <div class="albums">${ALBUMS.map(g => {
+      const n = ALL.filter(s => s.group === g).length, cover = albumPhotos(g).photos[0];
+      return `<a class="album" href="#album-${albumSlug(g)}">
+        <span class="album-cover"><img src="${esc(cover.image)}" alt="" decoding="async"></span>
+        <span class="album-meta"><strong>${esc(groupLabel(g))}</strong><span><span class="n">${n} photo${n === 1 ? "" : "s"}</span> · ${esc(g === "Terrestrial" ? "Look-alikes that fooled searchers" : HINTS[g] || "")}</span></span>
+      </a>`;
+    }).join("")}</div>
+  </section>`;
+  $("#gBack").onclick = leaveAlbum;
+}
+let viewList = [];
+function albumView(g) {
+  phase = "album"; S = null; $("#hud").hidden = true;
+  const { photos, total } = albumPhotos(g);
+  const counts = new Map();  // subtype sizes across the whole group, to order the sections
+  for (const s of ALL) if (s.group === g) { const k = subclassOf(s); counts.set(k, (counts.get(k) || 0) + 1) }
+  const secs = new Map();
+  for (const s of photos) { const k = subclassOf(s); if (!secs.has(k)) secs.set(k, []); secs.get(k).push(s) }
+  const order = [...secs.keys()].sort((a, b) => counts.get(b) - counts.get(a) || a.localeCompare(b));
+  viewList = order.flatMap(k => secs.get(k));
+  let idx = 0;
+  const sections = order.map(k => {
+    const list = secs.get(k), n = counts.get(k);
+    const head = order.length > 1 ? `<h3>${esc(k)} <span>${list.length < n ? `${list.length} of ${n}` : n} photo${n === 1 ? "" : "s"}</span></h3>` : "";
+    return `<section class="g-sec">${head}<div class="jgrid">${list.map(s => tileHTML(s, idx++)).join("")}</div></section>`;
+  }).join("");
+  app.innerHTML = `
+  <section class="gallery">
+    <div class="g-top"><button type="button" class="ghost" id="gBack">← Back to the quiz</button></div>
+    ${albumTabs(g)}
+    <div class="g-head">
+      <h2>${esc(groupLabel(g))}<small>${total} photo${total === 1 ? "" : "s"}</small></h2>
+      ${TIPS[g] ? `<div class="tip g-tip">${TIPS[g]}</div>` : ""}
+    </div>
+    ${photos.length < total ? `<p class="g-note">Showing ${photos.length} of ${total}, picked to cover every subtype. <button type="button" class="linkish" id="gAll">Show all ${total}</button></p>` : ""}
+    ${sections}
+    <div class="g-foot"><button type="button" class="go" id="gLearn">Practise in Learn mode</button><a class="ghost" href="#album">All albums</a></div>
+  </section>`;
+  app.querySelectorAll(".jtile").forEach(b => b.onclick = () => openViewer(viewList, +b.dataset.i));
+  $("#gBack").onclick = leaveAlbum;
+  $("#gLearn").onclick = () => { leaveAlbum(); mode = "learn"; store.set(K.mode, mode); newGame() };
+  const more = $("#gAll"); if (more) more.onclick = () => { albumShowAll.add(g); albumView(g) };
+}
+
+// Photo viewer: arrows or swipe to move, tap to zoom. Opening a photo counts as "seen", so the
+// quiz then prefers photos you haven't studied. On phones, the back button closes the viewer.
+const V = { list: [], i: 0, sx: 0, sy: 0, swiped: false, popping: false };
+function openViewer(list, i) {
+  V.list = list; V.i = i; showViewer();
+  const d = $("#viewer");
+  if (d.open) return;
+  history.pushState({ viewer: 1 }, "", location.href);
+  if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", "");
+  d.focus();
+}
+function showViewer() {
+  const s = V.list[V.i]; if (!s) return;
+  const img = $("#vImg");
+  $("#vPhoto").classList.remove("zoom");
+  img.src = s.image; img.alt = `Field photo of ${s.name}, ${s.classification}`;
+  $("#vCount").textContent = `${V.i + 1} / ${V.list.length}`;
+  $("#vInfo").innerHTML = factsHTML(s);
+  $("#vPrev").hidden = V.i <= 0; $("#vNext").hidden = V.i >= V.list.length - 1;
+  markSeen(s);
+  preload(V.list[V.i + 1]); preload(V.list[V.i - 1]);
+}
+function stepViewer(d) { const j = V.i + d; if (j >= 0 && j < V.list.length) { V.i = j; showViewer() } }
+(() => {
+  const d = $("#viewer"), ph = $("#vPhoto");
+  $("#vClose").onclick = () => d.close();
+  $("#vPrev").onclick = () => stepViewer(-1);
+  $("#vNext").onclick = () => stepViewer(1);
+  d.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") { e.preventDefault(); stepViewer(-1) }
+    else if (e.key === "ArrowRight") { e.preventDefault(); stepViewer(1) }
+  });
+  ph.addEventListener("pointerdown", e => { V.sx = e.clientX; V.sy = e.clientY; V.swiped = false });
+  ph.addEventListener("pointerup", e => {
+    const dx = e.clientX - V.sx, dy = e.clientY - V.sy;
+    if (!ph.classList.contains("zoom") && Math.abs(dx) > 50 && Math.abs(dx) > 1.5 * Math.abs(dy)) { V.swiped = true; stepViewer(dx < 0 ? 1 : -1) }
+  });
+  ph.addEventListener("click", e => {
+    if (V.swiped) { V.swiped = false; return }
+    const img = $("#vImg"), r = ph.getBoundingClientRect();
+    img.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+    ph.classList.toggle("zoom");
+  });
+  d.addEventListener("close", () => {
+    if (!V.popping && history.state && history.state.viewer) history.back();
+    V.popping = false;
+    const t = app.querySelector(`.jtile[data-i="${V.i}"]`); if (t) t.focus();
+  });
+  window.addEventListener("popstate", () => { if (d.open) { V.popping = true; d.close() } });
+})();
+
+// #album and #album-<type> open the album; anything else is the quiz.
+function route() {
+  const h = decodeURIComponent(location.hash.replace(/^#/, ""));
+  if (h === "album") { albumHome(); window.scrollTo(0, 0); return true }
+  if (h.startsWith("album-") && SLUG2G[h.slice(6)]) { albumView(SLUG2G[h.slice(6)]); window.scrollTo(0, 0); return true }
+  if (phase === "album") { startScreen(); return true }
+  return false;
+}
+window.addEventListener("hashchange", route);
 
 function resetQuit() { const b = $("#quitBtn"); delete b.dataset.armed; b.textContent = "Quit" }
 $("#quitBtn").onclick = () => {
@@ -780,7 +1035,7 @@ $("#quitBtn").onclick = () => {
 };
 
 document.addEventListener("keydown", e => {
-  if (e.metaKey || e.ctrlKey || e.altKey || $("#detail").open) return;
+  if (e.metaKey || e.ctrlKey || e.altKey || $("#detail").open || $("#viewer").open) return;
   const k = e.key.toLowerCase();
   if (phase === "guess") { if (k === "m") call("met"); else if (k === "e" || k === "t") call("ter") }
   else if (phase === "bonus") {
@@ -793,7 +1048,7 @@ if (!ALL.length) {
   app.innerHTML = `<p>No samples loaded. Run <code>python3 scraper/scrape.py</code> to download the photo set into <code>quiz/</code>.</p>`;
   return;
 }
-startScreen();
+if (!route()) startScreen();
 })();
 </script>
 </body>

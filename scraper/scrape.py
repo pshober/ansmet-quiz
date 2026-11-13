@@ -32,12 +32,17 @@ BASE = "https://www-curator.jsc.nasa.gov"
 SEARCH = (BASE + "/cfc/GenerateTable.cfc?method=returnSearchTable&returnformat=plain"
           "&samplenumber={prefix}&keyword=&classification=All&weathering=All&fracturing=All"
           "&year=All&site=All&nl=All&nlyear=All&si=&sortOptions=")
+TYPE_TABLE = (BASE + "/cfc/GenerateTable.cfc?method=createTable&returnformat=plain"
+              "&tabtype={tab}&subclass={sub}&sortOptions=sample")
 PETDES = BASE + "/antmet/samples/petdes.cfm?sample={sample}"
 IMG = BASE + "/antmet/samples/images/{name}"
 
 METEORITE_SITE = "DOM"
 NEARBY_SITES = ["MIL", "MAC", "LEW", "GRO", "QUE"]
 TERRESTRIAL_SITES = [METEORITE_SITE] + NEARBY_SITES
+# Rare groups that look the same wherever they were found: take every sample with a field photo
+# from every ANSMET icefield, via the database's by-type tables (tab code, subclass; "" = all).
+ALL_SITE_TYPES = [("IR", ""), ("SI", ""), ("AC", "LUNAR"), ("AC", "MARTIAN")]
 DELAY = 0.5  # seconds between requests -- be polite to NASA's server
 UA = "Mozilla/5.0 (ANSMET field-training quiz builder)"
 
@@ -75,7 +80,15 @@ def text(s):
 
 
 def search_site(prefix):
-    t = fetch(SEARCH.format(prefix=prefix), f"search_{prefix}.html")
+    return parse_rows(fetch(SEARCH.format(prefix=prefix), f"search_{prefix}.html"))
+
+
+def search_type(tab, sub=""):
+    """Every sample of one type from all ANSMET sites (the database's by-type tabs)."""
+    return parse_rows(fetch(TYPE_TABLE.format(tab=tab, sub=sub), f"type_{tab}_{sub or 'ALL'}.html"))
+
+
+def parse_rows(t):
     rows = []
     for r in re.findall(r"<tr>(.*?)</tr>", t, re.S):
         tds = re.findall(r"<td[^>]*>(.*?)</td>", r, re.S)
@@ -94,7 +107,7 @@ def group_of(cls):
         return "Terrestrial"
     if "lunar" in c:
         return "Lunar"
-    if "martian" in c or "shergottite" in c or "nakhlite" in c:
+    if re.search(r"martian|shergottite|nakhlite|chassignite|\bsnc\b", c):
         return "Martian"
     if c.startswith("iron"):
         return "Iron"
@@ -194,6 +207,16 @@ def main():
             if g not in ("Ordinary chondrite", "Terrestrial", "Other"):
                 picks.append({**r, "group": g})
 
+    # Irons, stony-irons, lunar and Martian from every ANSMET icefield
+    have_ids = {p["id"] for p in picks}
+    for tab, sub in ALL_SITE_TYPES:
+        rows = search_type(tab, sub)
+        new = [r for r in rows if r["id"] not in have_ids and group_of(r["classification"]) != "Other"]
+        print(f"all sites {tab} {sub or 'ALL'}: {len(rows)} samples, {len(new)} not already picked")
+        for r in new:
+            picks.append({**r, "group": group_of(r["classification"])})
+            have_ids.add(r["id"])
+
     for site in TERRESTRIAL_SITES:
         terr = [r for r in sites[site] if group_of(r["classification"]) == "Terrestrial"]
         print(f"{site}: {len(terr)} terrestrial")
@@ -219,10 +242,12 @@ def main():
         if not save_image(d["photos"][0], img):
             continue
         name = re.sub(r"^([A-Z]+)(\d+)$", r"\1 \2", sid)
+        with Image.open(img) as im:
+            w, h = im.size  # the album lays photos out by their real shape
         out.append({
             "id": sid, "name": name, "classification": p["classification"],
             "group": p["group"], "location": d["location"], "dimensions": d["dimensions"],
-            "weight": d["weight"], "description": d["macro"], "image": f"images/{sid}.webp",
+            "weight": d["weight"], "description": d["macro"], "image": f"images/{sid}.webp", "w": w, "h": h,
             "photo": d["photos"][0],
         })
         print(f"[{i}/{len(picks)}] {sid} {p['classification']}", flush=True)
