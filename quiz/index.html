@@ -325,7 +325,7 @@ footer a { color: inherit }
 
   <main id="app"></main>
 
-  <footer>Field photos courtesy of the ANSMET program (Case Western Reserve University and the University of Utah), via the
+  <footer><a href="https://planetarypat.com/">← planetarypat.com</a> · Field photos courtesy of the ANSMET program (Case Western Reserve University and the University of Utah), via the
     <a href="https://www-curator.jsc.nasa.gov/antmet/classdb.cfm" target="_blank" rel="noopener">NASA JSC Antarctic Meteorite database</a>.
     Earth rocks and most meteorites come from the Dominion Range (DOM) and nearby icefields: Miller Range (MIL), MacAlpine Hills (MAC),
     Lewis Cliff (LEW), Grosvenor Mountains (GRO) and Queen Alexandra Range (QUE). Irons, stony-irons, lunar and Martian meteorites
@@ -413,6 +413,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": 
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a };
 const nasaURL = s => `https://www-curator.jsc.nasa.gov/antmet/samples/petdes.cfm?sample=${encodeURIComponent(s.id)}`;
 const groupLabel = g => g === "Terrestrial" ? "Earth rocks" : g;
+const thumbOf = s => s.thumb || s.image;  // small version for grids and previews; s.image is full resolution
 
 // ---- Adaptive practice ---------------------------------------------------------------------
 // Each group keeps a skill score from your answers; newer answers count more. In Learn mode,
@@ -557,7 +558,7 @@ function reviewHTML(entries) {
   S.review = entries;
   return `<div class="misses">${entries.map((l, i) => `
     <button type="button" class="miss" data-i="${i}">
-      <img src="${esc(l.s.image)}" alt="Field photo of ${esc(l.s.name)}" loading="lazy">
+      <img src="${esc(thumbOf(l.s))}" alt="Field photo of ${esc(l.s.name)}" loading="lazy">
       <div><span class="tag ${l.right ? "warn" : "bad"}">${esc(missLabel(l))}</span><b>${esc(l.s.classification)}</b>${esc(l.s.name)}</div>
     </button>`).join("")}</div>`;
 }
@@ -635,7 +636,7 @@ function startScreen() {
       <p class="pool">${METS.length} meteorites and ${TERR.length} Earth rocks in the photo pool.</p>
     </div>
     <div class="start-side">
-      <div class="start-photos" aria-hidden="true">${order.map(s => `<img src="${esc(s.image)}" alt="">`).join("")}</div>
+      <div class="start-photos" aria-hidden="true">${order.map(s => `<img src="${esc(thumbOf(s))}" alt="">`).join("")}</div>
       ${notebookHTML()}
     </div>
   </section>`;
@@ -905,7 +906,7 @@ function tileHTML(s, i) {
   const ar = s.w && s.h ? s.w / s.h : 0.77;
   return `<button type="button" class="jtile" data-i="${i}" style="flex:${(ar * 100).toFixed(1)} 1 calc(${ar.toFixed(3)} * var(--rowh))">
     <i style="padding-bottom:${(100 / ar).toFixed(2)}%"></i>
-    <img src="${esc(s.image)}" alt="Field photo of ${esc(s.name)}, ${esc(s.classification)}" loading="${i < 16 ? "eager" : "lazy"}" decoding="async">
+    <img src="${esc(thumbOf(s))}" alt="Field photo of ${esc(s.name)}, ${esc(s.classification)}" loading="${i < 16 ? "eager" : "lazy"}" decoding="async">
     <span class="jcap">${esc(s.classification)}<br>${esc(s.name)}</span></button>`;
 }
 function leaveAlbum() {
@@ -924,7 +925,7 @@ function albumHome() {
     <div class="albums">${ALBUMS.map(g => {
       const n = ALL.filter(s => s.group === g).length, cover = albumPhotos(g).photos[0];
       return `<a class="album" href="#album-${albumSlug(g)}">
-        <span class="album-cover"><img src="${esc(cover.image)}" alt="" decoding="async"></span>
+        <span class="album-cover"><img src="${esc(thumbOf(cover))}" alt="" decoding="async"></span>
         <span class="album-meta"><strong>${esc(groupLabel(g))}</strong><span><span class="n">${n} photo${n === 1 ? "" : "s"}</span> · ${esc(g === "Terrestrial" ? "Look-alikes that fooled searchers" : HINTS[g] || "")}</span></span>
       </a>`;
     }).join("")}</div>

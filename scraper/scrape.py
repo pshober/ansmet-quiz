@@ -9,7 +9,9 @@ The pool is deliberately big so players rarely see the same photo twice; how oft
 meteorite group appears in the game is set in quiz/index.html (GROUP_WEIGHT), not here.
 
 Output:
-  quiz/images/<SAMPLE>.webp  (resized to max 900px, WebP quality 75: ~40 KB each)
+  quiz/photos/<SAMPLE>.webp  (NASA's full resolution, 1280 px on the long side; for the quiz and viewer)
+  quiz/thumbs/<SAMPLE>.webp  (520 px thumbnails for the album grids)
+  To re-encode after changing PHOTO_* / THUMB_* settings, delete quiz/photos and quiz/thumbs.
   quiz/samples.js            (window.SAMPLES = [...])
   scraper/cache/             (raw HTML cache so re-runs are cheap)
 
@@ -44,6 +46,8 @@ TERRESTRIAL_SITES = [METEORITE_SITE] + NEARBY_SITES
 # from every ANSMET icefield, via the database's by-type tables (tab code, subclass; "" = all).
 ALL_SITE_TYPES = [("IR", ""), ("SI", ""), ("AC", "LUNAR"), ("AC", "MARTIAN")]
 DELAY = 0.5  # seconds between requests -- be polite to NASA's server
+PHOTO_MAX, PHOTO_QUALITY = 1600, 86   # NASA's originals are 1280 px, so this keeps full resolution
+THUMB_MAX, THUMB_QUALITY = 520, 78
 UA = "Mozilla/5.0 (ANSMET field-training quiz builder)"
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -160,8 +164,10 @@ def sample_details(sid):
     }
 
 
-def save_image(name, dest):
-    if dest.exists():
+def save_image(name, sid):
+    """Write the full-resolution photo and its album thumbnail; returns False if the image is bad."""
+    photo, thumb = OUT / "photos" / f"{sid}.webp", OUT / "thumbs" / f"{sid}.webp"
+    if photo.exists() and thumb.exists():
         return True
     raw = fetch(IMG.format(name=name), f"img/{name}", binary=True)
     try:
@@ -169,9 +175,11 @@ def save_image(name, dest):
     except Exception as e:  # noqa: BLE001
         print(f"  bad image {name}: {e}", file=sys.stderr)
         return False
-    im.thumbnail((900, 900))
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    im.save(dest, "WEBP", quality=75, method=6)
+    for dest, size, q in ((photo, PHOTO_MAX, PHOTO_QUALITY), (thumb, THUMB_MAX, THUMB_QUALITY)):
+        out = im.copy()
+        out.thumbnail((size, size), getattr(Image, "Resampling", Image).LANCZOS)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        out.save(dest, "WEBP", quality=q, method=6)
     return True
 
 
@@ -238,16 +246,16 @@ def main():
         if not d["photos"]:
             print(f"[{i}/{len(picks)}] {sid}: no field photo, skipped")
             continue
-        img = OUT / "images" / f"{sid}.webp"
-        if not save_image(d["photos"][0], img):
+        if not save_image(d["photos"][0], sid):
             continue
+        img = OUT / "photos" / f"{sid}.webp"
         name = re.sub(r"^([A-Z]+)(\d+)$", r"\1 \2", sid)
         with Image.open(img) as im:
             w, h = im.size  # the album lays photos out by their real shape
         out.append({
             "id": sid, "name": name, "classification": p["classification"],
             "group": p["group"], "location": d["location"], "dimensions": d["dimensions"],
-            "weight": d["weight"], "description": d["macro"], "image": f"images/{sid}.webp", "w": w, "h": h,
+            "weight": d["weight"], "description": d["macro"], "image": f"photos/{sid}.webp", "thumb": f"thumbs/{sid}.webp", "w": w, "h": h,
             "photo": d["photos"][0],
         })
         print(f"[{i}/{len(picks)}] {sid} {p['classification']}", flush=True)
@@ -258,9 +266,15 @@ def main():
         "window.SAMPLES = [\n" + ",\n".join(json.dumps(s, ensure_ascii=False, separators=(",", ":")) for s in out)
         + "\n];\n", encoding="utf-8")
     keep = {f"{s['id']}.webp" for s in out}
-    for f in (OUT / "images").glob("*"):
-        if f.name not in keep:
+    for folder in ("photos", "thumbs"):
+        for f in (OUT / folder).glob("*"):
+            if f.name not in keep:
+                f.unlink()
+    old = OUT / "images"  # pre-HD 900 px photos
+    if old.exists():
+        for f in old.glob("*"):
             f.unlink()
+        old.rmdir()
     from collections import Counter
     print("\nDone:", len(out), "samples")
     for g, n in Counter(s["group"] for s in out).most_common():

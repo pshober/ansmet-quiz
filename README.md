@@ -39,7 +39,10 @@ Built by `scraper/scrape.py`:
   same wherever they're found, and they're rare), via the database's by-type tables
 - 60 each of H, L and LL ordinary chondrites from DOM (random, `--seed 1`)
 
-Only field photos are used (no lab or thin-section photos), resized to 900 px WebP (~45 KB each).
+Only field photos are used (no lab or thin-section photos), at NASA's full resolution (1280 px on
+the long side) as WebP quality 86 (~160 KB each) in `quiz/photos/`, plus 520 px thumbnails in
+`quiz/thumbs/` for the album grids. To re-encode after changing the size/quality settings at the
+top of the scraper, delete those two folders and run it again.
 Samples without a field photo are skipped. The pool is large on purpose, so players learn the
 features rather than memorising individual photos. Current pool: 1,198 photos (143 Earth rocks,
 171 ordinary chondrites, 508 carbonaceous, 122 HED, 99 irons, 43 stony-irons, 42 enstatite,
