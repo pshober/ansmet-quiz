@@ -1,0 +1,6 @@
+# Raw HTML pages and full-size original photos from the NASA site (~550 MB); rebuilt by the scraper
+scraper/cache/
+scraper/*.log
+__pycache__/
+*.pyc
+.DS_Store

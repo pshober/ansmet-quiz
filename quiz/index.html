@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dominion Range Field Quiz</title>
+<meta name="description" content="Meteorite or Earth rock? A photo quiz built from real ANSMET field photos, to train searchers before they go out on the ice.">
+<link rel="canonical" href="https://planetarypat.com/ansmet-quiz/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dominion Range Field Quiz">
+<meta property="og:description" content="Meteorite or Earth rock? Train your eye on real ANSMET field photos before you go out on the ice.">
+<meta property="og:url" content="https://planetarypat.com/ansmet-quiz/">
+<meta property="og:image" content="https://planetarypat.com/ansmet-quiz/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 3v27' stroke='%230f2230' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M8 4h19l-5 7 5 7H8z' fill='%23d9481f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one-screen field instrument. Photo is the hero; answer controls sit beside it (desktop) or below it (phone). */
+:root {
+  --ice: #eaf2f7;          /* page: sunlit blue ice */
+  --ice-deep: #c9dfeb;     /* panels, hairlines */
+  --surface: #f8fbfd;      /* cards */
+  --ink: #0f2230;          /* text: polar navy */
+  --ink-soft: #4a6273;
+  --flag: #d9481f;         /* ANSMET flag orange, the one accent */
+  --flag-ink: #ffffff;
+  --crust: #1c1a19;        /* fusion-crust black: meteorite button */
+  --crust-ink: #f4efe9;
+  --stone: #7d6e5b;        /* weathered dolerite: Earth rock button */
+  --stone-ink: #ffffff;
+  --good: #1f8a5b;
+  --bad: #c0392b;
+  --shadow: 0 1px 2px rgba(15,34,48,.08), 0 8px 24px rgba(15,34,48,.08);
+  --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ice: #0b1720; --ice-deep: #1d3242; --surface: #12232f; --ink: #e3eef5; --ink-soft: #93abbb;
+  --flag: #ff7148; --flag-ink: #1a0b05; --crust: #000000; --crust-ink: #f4efe9; --stone: #a3927b; --stone-ink: #14110d;
+  --good: #3fc68a; --bad: #ff6b5b; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --ice: #0b1720; --ice-deep: #1d3242; --surface: #12232f; --ink: #e3eef5; --ink-soft: #93abbb;
+  --flag: #ff7148; --flag-ink: #1a0b05; --crust: #000000; --crust-ink: #f4efe9; --stone: #a3927b; --stone-ink: #14110d;
+  --good: #3fc68a; --bad: #ff6b5b; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); color-scheme: dark }
+
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px) }
+html, body { min-height: 100% }
+body {
+  margin: 0; background: var(--ice); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 32px;
+}
+img { max-width: 100% }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--flag); outline-offset: 2px }
+.wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px }
+.label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 6px }
+kbd { font-family: var(--f-mono); font-size: 11px; border: 1px solid currentColor; border-radius: 3px; padding: 0 5px; opacity: .75 }
+
+/* Header */
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap }
+.brand { display: flex; align-items: center; gap: 10px }
+.brand svg { flex: none }
+.brand .flagcloth { fill: var(--flag) }
+.brand h1 { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: 26px; letter-spacing: .01em; text-transform: uppercase; line-height: 1 }
+.brand small { display: block; font-family: var(--f-body); font-size: 12px; color: var(--ink-soft); letter-spacing: .02em; text-transform: none; font-weight: 500 }
+.hud { display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
+.chip { background: var(--surface); border: 1px solid var(--ice-deep); border-radius: 999px; padding: 4px 12px; font-size: 13px; display: flex; gap: 6px; align-items: baseline; font-variant-numeric: tabular-nums }
+.chip b { font-family: var(--f-display); font-size: 18px; font-weight: 700 }
+.chip.streak b { color: var(--flag) }
+.chip.mode-chip { background: var(--ink); color: var(--ice); border-color: var(--ink); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 12px; align-self: stretch; align-items: center }
+.chip.quit { color: var(--ink-soft) }
+.bump { display: inline-block; animation: bump .35s ease }
+@keyframes bump { 40% { transform: scale(1.18) } }
+
+/* Start screen */
+.start { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: 28px; align-items: start }
+.start-main { min-width: 0 }
+.start-side { display: flex; flex-direction: column; gap: 16px; min-width: 0 }
+.start-photos { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px }
+.start-photos img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 6px; background: var(--ice-deep); display: block }
+.start h2 { font-family: var(--f-display); font-weight: 800; font-size: clamp(40px, 6vw, 68px); line-height: .92; margin: 8px 0 12px; text-transform: uppercase; text-wrap: balance }
+.start h2 em { font-style: normal; color: var(--flag) }
+.intro { margin: 0 0 18px; max-width: 54ch; color: var(--ink-soft) }
+.modes { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 16px }
+.mode { text-align: left; background: var(--surface); border: 2px solid var(--ice-deep); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px }
+.mode strong { font-family: var(--f-display); font-size: 24px; font-weight: 800; text-transform: uppercase; line-height: 1 }
+.mode span { font-size: 13px; color: var(--ink-soft); line-height: 1.4 }
+.mode[aria-pressed="true"] { border-color: var(--flag); box-shadow: var(--shadow) }
+.mode[aria-pressed="true"] strong { color: var(--flag) }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px }
+.seg button { border: 1px solid var(--ice-deep); background: var(--surface); padding: 7px 14px; border-radius: 6px; font-weight: 500; font-variant-numeric: tabular-nums }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--ice); border-color: var(--ink) }
+.how { list-style: none; padding: 0; margin: 0 0 20px; display: grid; gap: 6px; font-size: 14px }
+.how li { display: flex; gap: 10px }
+.how span { font-family: var(--f-mono); font-size: 12px; color: var(--flag); padding-top: 2px; min-width: 6ch }
+.go { background: var(--flag); color: var(--flag-ink); font-family: var(--f-display); font-weight: 700; font-size: 24px; letter-spacing: .04em; text-transform: uppercase; padding: 12px 28px; border-radius: 6px; box-shadow: var(--shadow) }
+.go:hover { filter: brightness(1.06) }
+.records { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px }
+.records:empty { display: none }
+.rec { background: var(--surface); border: 1px solid var(--ice-deep); border-radius: 8px; padding: 8px 14px; display: flex; align-items: center; gap: 14px }
+.rec .label { margin: 0 }
+.rec b { display: block; font-family: var(--f-display); font-size: 32px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums }
+.rec small { display: block; font-size: 12px; color: var(--ink-soft) }
+.spark { display: block; overflow: visible }
+.spark polyline { fill: none; stroke: var(--flag); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round }
+.spark circle { fill: var(--flag) }
+.spark line { stroke: var(--ice-deep); stroke-width: 1 }
+.keys { font-size: 13px; color: var(--ink-soft); margin: 14px 0 0 }
+.pool { font-size: 12px; color: var(--ink-soft); margin: 6px 0 0 }
+
+/* Field notebook */
+.notebook { background: var(--surface); border-radius: 8px; box-shadow: var(--shadow); padding: 14px 16px }
+.nb-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px }
+.notebook h3 { font-family: var(--f-display); font-size: 22px; text-transform: uppercase; margin: 0; font-weight: 700 }
+.nb-note { font-size: 12px; color: var(--ink-soft); margin: 2px 0 10px }
+.nb-reset { font-size: 12px; color: var(--ink-soft); text-decoration: underline }
+.notebook ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px }
+.notebook li { display: grid; grid-template-columns: minmax(0,12.5em) minmax(60px,1fr) minmax(0,9.5em); gap: 10px; align-items: center; font-size: 13px }
+.nb-name { font-weight: 500 }
+.nb-bar { height: 8px; background: var(--ice); border-radius: 4px; overflow: hidden; border: 1px solid var(--ice-deep) }
+.nb-bar i { display: block; height: 100%; border-radius: 3px; transition: width .4s ease }
+.nb-bar i.hi { background: var(--good) } .nb-bar i.mid { background: var(--flag) } .nb-bar i.lo { background: var(--bad) }
+.nb-lvl { color: var(--ink-soft); font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; font-variant-numeric: tabular-nums }
+.nb-focus { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 1px 6px; border-radius: 999px; border: 1px solid currentColor }
+.nb-focus.more { color: var(--flag) } .nb-focus.less { color: var(--good) }
+
+/* Play screen */
+.play { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(0,1fr); gap: 20px; align-items: start }
+.photo { position: relative; background: var(--crust); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); aspect-ratio: 4/5; max-height: calc(100vh - 120px); width: 100%; max-width: 100%; justify-self: center }
+.photo img { width: 100%; height: 100%; object-fit: contain; display: block; transition: transform .25s ease; cursor: zoom-in }
+.photo.zoom img { transform: scale(2.2); cursor: zoom-out }
+.photo .count { position: absolute; left: 10px; top: 10px; background: rgba(0,0,0,.55); color: #fff; font-family: var(--f-mono); font-size: 12px; padding: 3px 8px; border-radius: 4px }
+.photo .hint { position: absolute; right: 10px; bottom: 10px; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 4px; pointer-events: none }
+.stamp { position: absolute; left: 50%; top: 42%; transform: translate(-50%,-50%) rotate(-8deg); font-family: var(--f-display); font-weight: 800; font-size: clamp(36px, 7vw, 72px); text-transform: uppercase; padding: 4px 18px; border: 5px solid currentColor; border-radius: 8px; background: rgba(255,255,255,.88); pointer-events: none; animation: stamp .3s cubic-bezier(.2,1.6,.4,1); white-space: nowrap }
+.stamp.ok { color: #1f8a5b } .stamp.no { color: #c0392b }
+@keyframes stamp { from { transform: translate(-50%,-50%) rotate(-8deg) scale(1.8); opacity: 0 } }
+
+.panel { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+.q { font-family: var(--f-display); font-weight: 700; font-size: 30px; line-height: 1.05; text-transform: uppercase; margin: 0 }
+.q-sub { color: var(--ink-soft); margin: -8px 0 0; font-size: 14px }
+.big2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.big { border-radius: 8px; padding: 18px 12px 14px; text-align: left; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 2px; transition: transform .1s }
+.big:hover { transform: translateY(-2px) }
+.big:active { transform: translateY(1px) }
+.big strong { font-family: var(--f-display); font-size: 28px; font-weight: 800; text-transform: uppercase; line-height: 1 }
+.big span { font-size: 13px; opacity: .85 }
+.big kbd { margin-top: 8px; align-self: flex-start }
+.big.met { background: var(--crust); color: var(--crust-ink) }
+.big.ter { background: var(--stone); color: var(--stone-ink) }
+.groups { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+.groups button { background: var(--surface); border: 1px solid var(--ice-deep); border-radius: 6px; padding: 9px 10px; text-align: left; display: flex; gap: 8px; align-items: flex-start; font-weight: 500; font-size: 14px; line-height: 1.25 }
+.groups button:hover { border-color: var(--flag) }
+.groups button kbd { flex: none; margin-top: 1px }
+.groups small { display: block; font-size: 11px; color: var(--ink-soft); font-weight: 400; margin-top: 2px }
+.skip { color: var(--ink-soft); text-decoration: underline; font-size: 14px; align-self: flex-start }
+
+.result { background: var(--surface); border-radius: 8px; box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column; gap: 12px; border-top: 5px solid var(--good); min-width: 0 }
+.result.wrong { border-top-color: var(--bad) }
+.verdict { font-family: var(--f-display); font-weight: 800; font-size: 28px; text-transform: uppercase; line-height: 1; color: var(--good) }
+.result.wrong .verdict { color: var(--bad) }
+.verdict-sub { font-size: 14px; color: var(--ink-soft); margin-top: 4px }
+.cls { font-family: var(--f-display); font-size: 34px; font-weight: 700; line-height: 1 }
+.grp { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: var(--ice); border: 1px solid var(--ice-deep); border-radius: 999px; padding: 2px 10px; margin-top: 6px }
+dl.meta { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 4px 14px; margin: 0; font-size: 14px }
+dl.meta dt { color: var(--ink-soft) }
+dl.meta dd { margin: 0; font-variant-numeric: tabular-nums }
+dl.meta dd.mono { font-family: var(--f-mono); font-size: 13px }
+.desc { margin: 0; font-size: 14px; border-left: 3px solid var(--ice-deep); padding-left: 12px }
+.desc::before { content: "Curator's notes"; display: block; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 2px }
+.tip { font-size: 13px; background: var(--ice); border-radius: 6px; padding: 10px 12px }
+.tip b { color: var(--flag) }
+.nasa { color: var(--ink-soft); font-size: 13px }
+.points { font-family: var(--f-display); font-size: 22px; font-weight: 700; color: var(--flag) }
+.next { align-self: stretch; background: var(--ink); color: var(--ice); font-family: var(--f-display); font-weight: 700; font-size: 22px; letter-spacing: .04em; text-transform: uppercase; padding: 12px; border-radius: 6px; display: flex; justify-content: center; gap: 10px; align-items: center }
+.next kbd { opacity: .6 }
+
+/* End and report screens */
+.end { display: flex; flex-direction: column; gap: 22px }
+.end-top { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.1fr); gap: 24px; align-items: start }
+.end h2 { font-family: var(--f-display); font-weight: 800; font-size: clamp(44px, 7vw, 76px); line-height: .9; text-transform: uppercase; margin: 0 }
+.end h2 em { font-style: normal; color: var(--flag) }
+.score { font-family: var(--f-display); font-weight: 800; font-size: clamp(80px, 13vw, 140px); line-height: .82; font-variant-numeric: tabular-nums }
+.score small { font-size: .28em; color: var(--ink-soft); font-weight: 700; margin-left: 4px }
+.band { font-family: var(--f-display); font-size: 30px; text-transform: uppercase; color: var(--flag); font-weight: 800; line-height: 1; margin-top: 10px }
+.rank { font-size: 15px; color: var(--ink-soft); margin-top: 8px; max-width: 48ch }
+.hist { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-size: 12px; color: var(--ink-soft) }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px }
+.stat { background: var(--surface); border-radius: 8px; padding: 12px 14px; box-shadow: var(--shadow) }
+.stat b { display: block; font-family: var(--f-display); font-size: 32px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums }
+.stat span { font-size: 13px; color: var(--ink-soft) }
+.stat.warn b { color: var(--bad) }
+.end h3 { font-family: var(--f-display); font-size: 24px; text-transform: uppercase; margin: 0 0 4px; font-weight: 700 }
+.end .sub { margin: 0 0 10px; font-size: 13px; color: var(--ink-soft) }
+.table-wrap { overflow-x: auto; background: var(--surface); border-radius: 8px; box-shadow: var(--shadow) }
+table.breakdown { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums }
+table.breakdown th, table.breakdown td { text-align: left; padding: 8px 14px; border-bottom: 1px solid var(--ice-deep); white-space: nowrap }
+table.breakdown thead th { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600 }
+table.breakdown tbody th { font-weight: 500; white-space: normal }
+table.breakdown tr:last-child > * { border-bottom: 0 }
+.ok-txt { color: var(--good) } .bad-txt { color: var(--bad) }
+.misses { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px }
+.miss { background: var(--surface); border-radius: 6px; overflow: hidden; box-shadow: var(--shadow); font-size: 12px; text-align: left; padding: 0; display: flex; flex-direction: column }
+.miss:hover { outline: 2px solid var(--flag) }
+.miss img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--crust) }
+.miss div { padding: 6px 8px 8px }
+.miss b { display: block; font-size: 13px }
+.tag { display: block; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 2px }
+.tag.bad { color: var(--bad) } .tag.warn { color: var(--flag) }
+.end-actions { display: flex; gap: 10px; flex-wrap: wrap }
+.ghost { border: 1px solid var(--ice-deep); background: var(--surface); padding: 10px 18px; border-radius: 6px; font-weight: 500 }
+
+/* Review dialog */
+dialog.detail { border: 0; border-radius: 10px; padding: 0; width: min(980px, calc(100vw - 32px)); max-width: none; background: var(--ice); color: var(--ink); box-shadow: var(--shadow) }
+dialog.detail::backdrop { background: rgba(5,15,22,.65) }
+.detail-body { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 16px; padding: 16px; max-height: calc(100vh - 48px); overflow: auto }
+.detail-body .photo { max-height: calc(100vh - 80px) }
+.detail-close { position: absolute; top: 10px; right: 10px; z-index: 2; background: var(--ink); color: var(--ice); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 600 }
+
+footer { font-size: 12px; color: var(--ink-soft); max-width: 90ch }
+footer a { color: inherit }
+
+@media (max-width: 760px) {
+  .start, .play, .end-top, .detail-body { grid-template-columns: minmax(0,1fr) }
+  .photo { aspect-ratio: 1; max-height: 62vh }
+  .brand h1 { font-size: 22px }
+}
+@media (max-width: 480px) {
+  .modes { grid-template-columns: minmax(0,1fr) }
+  .notebook li { grid-template-columns: minmax(0,1fr) minmax(0,1fr) }
+  .nb-lvl { grid-column: 1 / -1; margin-top: -4px }
+  .groups { grid-template-columns: minmax(0,1fr) }
+  table.breakdown th, table.breakdown td { padding: 8px 10px }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg width="30" height="34" viewBox="0 0 30 34" aria-hidden="true"><path d="M4 2v31" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path class="flagcloth" d="M5 3h21l-5 7 5 7H5z"/></svg>
+      <h1>Dominion Range Field Quiz<small>Train your eye for meteorites on the blue ice</small></h1>
+    </div>
+    <div class="hud" id="hud" hidden>
+      <div class="chip mode-chip" id="cMode">Learn</div>
+      <div class="chip" id="cScore">Score <b id="hScore">0</b></div>
+      <div class="chip streak" id="cStreak">Streak <b id="hStreak">0</b></div>
+      <div class="chip">Rock <b id="hRound">1/20</b></div>
+      <button class="chip quit" id="quitBtn" type="button">Quit</button>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <footer>Field photos courtesy of the ANSMET program (Case Western Reserve University and the University of Utah), via the
+    <a href="https://www-curator.jsc.nasa.gov/antmet/classdb.cfm" target="_blank" rel="noopener">NASA JSC Antarctic Meteorite database</a>.
+    Samples come from the Dominion Range (DOM) and nearby icefields: Miller Range (MIL), MacAlpine Hills (MAC), Lewis Cliff (LEW),
+    Grosvenor Mountains (GRO) and Queen Alexandra Range (QUE).</footer>
+</div>
+
+<dialog class="detail" id="detail" aria-label="Sample details"></dialog>
+
+<script src="samples.js"></script>
+<script>
+(() => {
+"use strict";
+const ALL = (window.SAMPLES || []).filter(s => s.image);
+const TERR = ALL.filter(s => s.group === "Terrestrial");
+const METS = ALL.filter(s => s.group !== "Terrestrial");
+const GROUP_ORDER = ["Ordinary chondrite", "Carbonaceous chondrite", "Enstatite chondrite", "HED achondrite",
+  "Lunar", "Martian", "Other achondrite", "Iron", "Stony-iron"];
+const GROUPS = GROUP_ORDER.filter(g => METS.some(s => s.group === g));
+
+// ---- Tuning ------------------------------------------------------------------------------
+// Base share of rocks shown, in %. The photo pool is as large as the database allows, so this
+// sets what you practise, not what was downloaded. Ordinary chondrites lead the meteorites
+// (they're ~95% of finds); rare groups are boosted well above their real frequency.
+const MIX = {
+  "Terrestrial": 50,
+  "Ordinary chondrite": 22,
+  "Carbonaceous chondrite": 10,
+  "HED achondrite": 5,
+  "Iron": 4,
+  "Other achondrite": 2,
+  "Enstatite chondrite": 2,
+  "Lunar": 2,
+  "Stony-iron": 2,
+  "Martian": 1
+};
+const TEST_LENGTH = 30;
+const LEARN_POINTS = { correct: 100, bonus: 50 };
+
+const HINTS = {
+  "Ordinary chondrite": "H, L, LL. Most finds",
+  "Carbonaceous chondrite": "CM, CO, CV, CR, CK…",
+  "Enstatite chondrite": "EH, EL",
+  "HED achondrite": "Eucrite, howardite, diogenite",
+  "Lunar": "From the Moon",
+  "Martian": "From Mars",
+  "Other achondrite": "Ureilite, acapulcoite…",
+  "Iron": "Solid metal",
+  "Stony-iron": "Mesosiderite, pallasite"
+};
+const TIPS = {
+  "Ordinary chondrite": "The bread and butter of the search. Look for dark brown to black <b>fusion crust</b>, often with rusty <b>oxidation halos</b> around metal grains. A broken face shows a grey interior, sometimes with visible chondrules.",
+  "Carbonaceous chondrite": "Many are <b>dull, sooty black</b> and crumbly, with a matte crust. Some (CO, CV) show small <b>light-coloured inclusions</b> on broken faces. Easy to dismiss as a dark Earth rock.",
+  "Enstatite chondrite": "Rare and metal-rich, so weathered ones are often <b>rusty</b>. The crust is dark brown to black.",
+  "HED achondrite": "Eucrites and howardites from asteroid Vesta often have <b>shiny, glassy black crust</b> over a <b>light grey interior</b>. That contrast is the giveaway.",
+  "Lunar": "Lunar breccias often show <b>white or light grey clasts in a darker matrix</b>, under a thin, sometimes glassy or greenish crust. Rare and precious.",
+  "Martian": "Very rare. Usually a <b>dark, often glossy crust</b> over a fine-grained or crystalline igneous interior.",
+  "Other achondrite": "Ureilites, acapulcoites, winonaites and ungrouped achondrites can look odd. Look for <b>fusion crust</b> on a stone that doesn't match the local moraine.",
+  "Iron": "<b>Heavy for its size</b>, often smooth or <b>thumbprinted (regmaglypts)</b>, brown to black. Very few Earth rocks look like this.",
+  "Stony-iron": "Mesosiderites and pallasites mix metal and silicate. They're <b>heavy</b>, with patches of rusty metal showing at the surface.",
+  "Terrestrial": "Common Earth rocks here include Ferrar dolerite, Beacon sandstone, basalt and granite. <b>Dark dolerite is the classic fake</b>: it has no true fusion crust, and a fresh face looks crystalline and speckled."
+};
+
+// ---- Storage (per browser; the page works without it) -------------------------------------
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v) } catch { return d } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} }
+};
+const K = { progress: "dfq.progress", seen: "dfq.seen", best: "dfq.best", tests: "dfq.tests", mode: "dfq.mode", length: "dfq.length" };
+const $ = s => document.querySelector(s);
+const app = $("#app");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a };
+const nasaURL = s => `https://www-curator.jsc.nasa.gov/antmet/samples/petdes.cfm?sample=${encodeURIComponent(s.id)}`;
+const groupLabel = g => g === "Terrestrial" ? "Earth rocks" : g;
+
+// ---- Adaptive practice ---------------------------------------------------------------------
+// Each group keeps a skill score from your answers; newer answers count more. In Learn mode,
+// groups you miss come up more and groups you've nailed come up less, within gentle bounds:
+// 0.5x to 2x their base MIX share, and the Earth-rock share stays between 40% and 60%.
+const DECAY = 0.9;               // weight left on older answers each time a group comes up again
+const PRIOR = { c: 3, n: 4 };    // every group starts at an assumed 75%, so a few answers can't swing it far
+const loadProgress = () => store.get(K.progress, {}) || {};
+function mastery(prog, g) { const p = prog[g] || { c: 0, n: 0 }; return (p.c + PRIOR.c) / (p.n + PRIOR.n) }
+function boost(prog, g) { return Math.min(2, Math.max(0.5, 0.5 + 2 * (1 - mastery(prog, g)))) }
+function recordAnswer(g, credit) {
+  const prog = loadProgress();
+  const p = prog[g] || { c: 0, n: 0, seen: 0 };
+  p.c = p.c * DECAY + credit; p.n = p.n * DECAY + 1; p.seen = (p.seen || 0) + 1;
+  prog[g] = p; store.set(K.progress, prog);
+}
+function terrestrialShare(prog) {
+  const mg = GROUPS.filter(g => (MIX[g] ?? 0) > 0);
+  const tot = mg.reduce((a, g) => a + MIX[g], 0) || 1;
+  const metErr = mg.reduce((a, g) => a + MIX[g] * (1 - mastery(prog, g)), 0) / tot;
+  const terErr = 1 - mastery(prog, "Terrestrial");
+  return Math.min(0.6, Math.max(0.4, MIX.Terrestrial / 100 + 0.4 * (terErr - metErr)));
+}
+
+// ---- Photo piles: unseen photos first, so the same photo rarely repeats ---------------------
+function makePiles() {
+  const seen = new Set(store.get(K.seen, []) || []);
+  const piles = {};
+  for (const s of shuffle([...ALL])) (piles[s.group] ||= []).push(s);
+  for (const g in piles) piles[g].sort((a, b) => seen.has(b.id) - seen.has(a.id));  // pop() takes unseen first
+  return piles;
+}
+function markSeen(s) {
+  const seen = (store.get(K.seen, []) || []).filter(id => id !== s.id);
+  seen.push(s.id);
+  store.set(K.seen, seen.slice(-Math.floor(ALL.length * 0.8)));
+}
+function drawAdaptive(piles) {
+  const prog = loadProgress();
+  const has = g => piles[g] && piles[g].length;
+  if (Math.random() < terrestrialShare(prog) && has("Terrestrial")) return piles.Terrestrial.pop();
+  const live = GROUPS.filter(g => has(g) && (MIX[g] ?? 1) > 0);
+  if (!live.length) return has("Terrestrial") ? piles.Terrestrial.pop() : null;
+  const w = adaptiveShares(prog, live);
+  let r = Math.random();
+  for (let i = 0; i < live.length; i++) { r -= w[i]; if (r <= 0) return piles[live[i]].pop() }
+  return piles[live[live.length - 1]].pop();
+}
+// Meteorite group shares after adaptation, each held within 0.5x-2x of its base share.
+function adaptiveShares(prog, groups) {
+  const base = groups.map(g => MIX[g] ?? 1), bt = base.reduce((a, b) => a + b, 0);
+  const b0 = base.map(x => x / bt);
+  const norm = a => { const t = a.reduce((x, y) => x + y, 0); return a.map(x => x / t) };
+  let s = norm(groups.map((g, i) => b0[i] * boost(prog, g)));
+  for (let k = 0; k < 8; k++) s = norm(s.map((x, i) => Math.min(2 * b0[i], Math.max(0.5 * b0[i], x))));
+  return s;
+}
+// Test mode: the same composition every time (largest-remainder split of MIX), so scores compare.
+function drawTestDeck(piles) {
+  const groups = ["Terrestrial", ...GROUPS].filter(g => piles[g]?.length && (MIX[g] ?? 0) > 0);
+  const tot = groups.reduce((a, g) => a + MIX[g], 0);
+  const parts = groups.map(g => { const x = TEST_LENGTH * MIX[g] / tot; return { g, k: Math.floor(x), r: x - Math.floor(x) + Math.random() * 1e-6 } });
+  const left = TEST_LENGTH - parts.reduce((a, p) => a + p.k, 0);
+  [...parts].sort((a, b) => b.r - a.r).slice(0, left).forEach(p => p.k++);
+  const deck = [];
+  for (const p of parts) for (let i = 0; i < p.k; i++) {
+    const s = piles[p.g].pop() || piles["Ordinary chondrite"]?.pop() || piles.Terrestrial?.pop();
+    if (s) deck.push(s);
+  }
+  return shuffle(deck);
+}
+
+// ---- Shared views ----------------------------------------------------------------------------
+function sparkline(vals) {
+  if (vals.length < 2) return "";
+  const W = 140, H = 40, p = 4;
+  const pts = vals.map((v, i) => [p + i * (W - 2 * p) / (vals.length - 1), H - p - (v / 100) * (H - 2 * p)]);
+  const last = pts[pts.length - 1];
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Recent test scores: ${vals.join(", ")}">
+    <line x1="${p}" x2="${W - p}" y1="${H - p}" y2="${H - p}"/>
+    <polyline points="${pts.map(q => q.map(n => n.toFixed(1)).join(",")).join(" ")}"/>
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3.5"/></svg>`;
+}
+function notebookHTML() {
+  const prog = loadProgress();
+  const rows = ["Terrestrial", ...GROUPS].map(g => {
+    // Shown: recent accuracy (newer answers weigh more). The smoothed mastery() only drives the mix.
+    const p = prog[g], seen = p?.seen || 0, enough = seen >= 3;
+    const acc = p && p.n > 0 ? p.c / p.n : 0, pct = Math.round(acc * 100), b = boost(prog, g);
+    const cls = acc >= 0.85 ? "hi" : acc >= 0.65 ? "mid" : "lo";
+    const focus = !seen ? "" : b >= 1.25 ? `<span class="nb-focus more">extra practice</span>` : b <= 0.75 ? `<span class="nb-focus less">shown less</span>` : "";
+    const lvl = enough ? `${pct}%` : seen ? `${seen} seen` : "Not seen yet";
+    return `<li><span class="nb-name">${esc(groupLabel(g))}</span>
+      <span class="nb-bar" role="img" aria-label="${esc(groupLabel(g))}: ${esc(lvl)}"><i class="${cls}" style="width:${enough ? pct : 0}%"></i></span>
+      <span class="nb-lvl">${lvl}${focus}</span></li>`;
+  }).join("");
+  return `<div class="notebook"><div class="nb-head"><h3>Field notebook</h3><button type="button" class="nb-reset" id="nbReset">Reset progress</button></div>
+    <p class="nb-note">Recent accuracy for each kind of rock, across both modes. A meteorite only counts fully when you also name its group. In Learn mode, weak groups come up more often.</p>
+    <ul>${rows}</ul></div>`;
+}
+function wireNotebook() {
+  const b = $("#nbReset"); if (!b) return;
+  b.onclick = () => {
+    if (b.dataset.armed) { for (const k of [K.progress, K.seen, K.best, K.tests]) store.set(k, null); startScreen(); return }
+    b.dataset.armed = "1"; b.textContent = "Click again to erase everything";
+    setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = "Reset progress" } }, 4000);
+  };
+}
+function factsHTML(s) {
+  return `<div><div class="cls">${esc(s.classification)}</div><span class="grp">${esc(s.group)}</span></div>
+    <dl class="meta">
+      <dt>Sample</dt><dd class="mono">${esc(s.name)}</dd>
+      ${s.location ? `<dt>Found at</dt><dd>${esc(s.location)}</dd>` : ""}
+      ${s.dimensions ? `<dt>Size</dt><dd>${esc(s.dimensions)} cm</dd>` : ""}
+      ${s.weight ? `<dt>Mass</dt><dd>${esc(s.weight)} g</dd>` : ""}
+    </dl>
+    ${s.description ? `<p class="desc">${esc(s.description)}</p>` : ""}
+    ${TIPS[s.group] ? `<div class="tip">${TIPS[s.group]}</div>` : ""}
+    <a class="nasa" href="${nasaURL(s)}" target="_blank" rel="noopener">Full record in the NASA database</a>`;
+}
+function verdictOf(e) {
+  const { s, grp, isMet, right, grpRight } = e;
+  if (right && isMet) return ["Good find", grp ? (grpRight ? "And you named the group." : `Right call. The group is ${s.group}, not ${grp}.`) : "Right call. That one goes in the bag."];
+  if (right) return ["Correct: Earth rock", "Good eye. Leave it on the ice."];
+  if (isMet) return ["Missed a meteorite", "This one would have been left on the ice."];
+  return ["That's an Earth rock", "A searcher bagged this one too. It happens to everyone."];
+}
+function photoHTML(s, id = "photo") {
+  return `<div class="photo" id="${id}"><img src="${esc(s.image)}" alt="Field photo of a sample on the ice">
+    <span class="count">Field photo</span><span class="hint">Tap to zoom</span></div>`;
+}
+function wirePhoto(p) {
+  if (!p) return;
+  p.onclick = e => {
+    const img = p.querySelector("img"), r = p.getBoundingClientRect();
+    img.style.transformOrigin = `${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`;
+    p.classList.toggle("zoom");
+  };
+}
+function preload(s) { if (s) { const im = new Image(); im.src = s.image } }
+function reviewHTML(entries) {
+  S.review = entries;
+  return `<div class="misses">${entries.map((l, i) => `
+    <button type="button" class="miss" data-i="${i}">
+      <img src="${esc(l.s.image)}" alt="Field photo of ${esc(l.s.name)}" loading="lazy">
+      <div><span class="tag ${l.right ? "warn" : "bad"}">${esc(missLabel(l))}</span><b>${esc(l.s.classification)}</b>${esc(l.s.name)}</div>
+    </button>`).join("")}</div>`;
+}
+function missLabel(l) {
+  if (!l.right) return l.isMet ? "Missed meteorite" : "Bagged an Earth rock";
+  return l.grp ? `You said ${l.grp}` : "Group skipped";
+}
+function wireReview() { app.querySelectorAll(".miss").forEach(b => b.onclick = () => openDetail(S.review[+b.dataset.i])) }
+function openDetail(e) {
+  const d = $("#detail");
+  const [v, sub] = verdictOf(e);
+  d.innerHTML = `<button type="button" class="detail-close" id="dClose">Close</button>
+    <div class="detail-body">${photoHTML(e.s, "dPhoto")}
+      <div class="result ${e.right ? "" : "wrong"}"><div><div class="verdict">${esc(v)}</div><div class="verdict-sub">${esc(sub)}</div></div>${factsHTML(e.s)}</div>
+    </div>`;
+  wirePhoto($("#dPhoto"));
+  $("#dClose").onclick = () => d.close();
+  d.onclick = ev => { if (ev.target === d) d.close() };
+  if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", "");
+}
+
+// ---- Game ------------------------------------------------------------------------------------
+let S = null, phase = "start";
+let mode = store.get(K.mode, "learn"); if (mode !== "learn" && mode !== "test") mode = "learn";
+let length = store.get(K.length, 20); if (![10, 20, 40].includes(length)) length = 20;
+
+function howHTML() {
+  return mode === "test"
+    ? `<li><span>2 pts</span>Right call on each rock: meteorite or Earth rock</li>
+       <li><span>+1 pt</span>Name a meteorite's group</li>
+       <li><span>/100</span>Your score is saved so you can watch it climb</li>`
+    : `<li><span>+100</span>Right call: meteorite or Earth rock</li>
+       <li><span>+50</span>Bonus: name the meteorite group</li>
+       <li><span>x2</span>Streaks of 5 or more double your points</li>`;
+}
+function recordsHTML() {
+  const tests = store.get(K.tests, []) || [], best = store.get(K.best, null), out = [];
+  if (tests.length) {
+    const top = Math.max(...tests.map(t => t.score));
+    out.push(`<div class="rec"><div><div class="label">Test score</div><b>${tests[tests.length - 1].score}</b><small>last test · best ${top}</small></div>${sparkline(tests.slice(-12).map(t => t.score))}</div>`);
+  }
+  if (best) out.push(`<div class="rec"><div><div class="label">Learn best</div><b>${best.score}</b><small>points in one round</small></div></div>`);
+  return out.join("");
+}
+
+function startScreen() {
+  phase = "start"; S = null; $("#hud").hidden = true;
+  if ($("#detail").open) $("#detail").close();
+  const order = shuffle([...shuffle([...METS]).slice(0, 2), ...shuffle([...TERR]).slice(0, 1)]);
+  app.innerHTML = `
+  <section class="start">
+    <div class="start-main">
+      <h2>Meteorite<br>or <em>Earth rock?</em></h2>
+      <p class="intro">Every photo here was taken on the ice by an ANSMET field team when the sample was collected. Some are meteorites. Some are Earth rocks that fooled a searcher. Learn to tell them apart before you're out there.</p>
+      <div class="label" id="modeLabel">Mode</div>
+      <div class="modes" role="group" aria-labelledby="modeLabel">
+        <button type="button" class="mode" id="modeLearn" data-mode="learn" aria-pressed="${mode === "learn"}"><strong>Learn</strong>
+          <span>See the answer and field tips after every rock. Groups you miss come up more often.</span></button>
+        <button type="button" class="mode" id="modeTest" data-mode="test" aria-pressed="${mode === "test"}"><strong>Test</strong>
+          <span>${TEST_LENGTH} rocks, the same mix every time, no hints. Scored out of 100 at the end.</span></button>
+      </div>
+      <div id="learnOpts" ${mode === "learn" ? "" : "hidden"}>
+        <div class="label" id="lenLabel">Rocks per round</div>
+        <div class="seg" role="group" aria-labelledby="lenLabel">
+          ${[10, 20, 40].map(n => `<button type="button" id="len${n}" data-len="${n}" aria-pressed="${n === length}">${n}</button>`).join("")}
+        </div>
+      </div>
+      <ul class="how" id="howList">${howHTML()}</ul>
+      <button class="go" id="goBtn" type="button">${mode === "test" ? "Start test" : "Start learning"}</button>
+      <div class="records">${recordsHTML()}</div>
+      <p class="keys">Keys: <kbd>M</kbd> meteorite · <kbd>E</kbd> Earth rock · <kbd>1</kbd>–<kbd>${GROUPS.length}</kbd> group · <kbd>0</kbd> skip · <kbd>Enter</kbd> next</p>
+      <p class="pool">${METS.length} meteorites and ${TERR.length} Earth rocks in the photo pool.</p>
+    </div>
+    <div class="start-side">
+      <div class="start-photos" aria-hidden="true">${order.map(s => `<img src="${esc(s.image)}" alt="">`).join("")}</div>
+      ${notebookHTML()}
+    </div>
+  </section>`;
+  app.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => {
+    mode = b.dataset.mode; store.set(K.mode, mode);
+    app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    $("#learnOpts").hidden = mode !== "learn";
+    $("#howList").innerHTML = howHTML();
+    $("#goBtn").textContent = mode === "test" ? "Start test" : "Start learning";
+  });
+  app.querySelectorAll("[data-len]").forEach(b => b.onclick = () => {
+    length = +b.dataset.len; store.set(K.length, length);
+    app.querySelectorAll("[data-len]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  });
+  $("#goBtn").onclick = newGame;
+  wireNotebook();
+  $("#goBtn").focus({ preventScroll: true });
+}
+
+function newGame() {
+  const piles = makePiles();
+  S = { mode, piles, deck: [], n: length, i: 0, score: 0, streak: 0, bestStreak: 0, log: [], lockUntil: 0 };
+  if (mode === "test") { S.deck = drawTestDeck(piles); S.n = S.deck.length }
+  $("#hud").hidden = false;
+  $("#cMode").textContent = mode === "test" ? "Test" : "Learn";
+  $("#cScore").hidden = $("#cStreak").hidden = mode === "test";
+  resetQuit();
+  showRock();
+}
+
+function hud(bump) {
+  $("#hScore").textContent = S.score;
+  $("#hStreak").textContent = S.streak;
+  $("#hRound").textContent = `${Math.min(S.i + 1, S.n)}/${S.n}`;
+  if (bump) { const el = $("#" + bump); el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump") }
+}
+
+function showRock() {
+  phase = "guess";
+  if (!S.deck[S.i]) S.deck[S.i] = drawAdaptive(S.piles);
+  const s = S.deck[S.i];
+  if (!s) return finish();
+  S.cur = { s, call: null, grp: null };
+  hud();
+  app.innerHTML = `<section class="play">${photoHTML(s)}
+    <div class="panel" id="panel">
+      <h2 class="q">Would you bag it?</h2>
+      <p class="q-sub">${S.mode === "test" ? "Test mode: no feedback until the end." : "Look at the crust, the colour, the shape and any broken face."}</p>
+      <div class="big2">
+        <button type="button" class="big met" id="btnMet"><strong>Meteorite</strong><span>Bag it and flag it</span><kbd>M</kbd></button>
+        <button type="button" class="big ter" id="btnTer"><strong>Earth rock</strong><span>Leave it on the ice</span><kbd>E</kbd></button>
+      </div>
+    </div></section>`;
+  wirePhoto($("#photo"));
+  $("#btnMet").onclick = () => call("met");
+  $("#btnTer").onclick = () => call("ter");
+  if (S.i + 1 < S.n && !S.deck[S.i + 1]) S.deck[S.i + 1] = drawAdaptive(S.piles);
+  preload(S.deck[S.i + 1]);
+}
+
+function call(c) {
+  if (phase !== "guess" || performance.now() < S.lockUntil) return;
+  S.cur.call = c;
+  if (c === "met") { phase = "bonus"; bonusPanel() } else answer();
+}
+
+function bonusPanel() {
+  const test = S.mode === "test";
+  $("#panel").innerHTML = `
+    <h2 class="q">${test ? "What kind?" : "Bonus: what kind?"}</h2>
+    <p class="q-sub">${test ? "Name the group for 1 more point, or skip." : `+${LEARN_POINTS.bonus} if you name the group. Skip if you're not sure.`}</p>
+    <div class="groups">${GROUPS.map((g, i) => `<button type="button" data-g="${esc(g)}"><kbd>${i + 1}</kbd><span>${esc(g)}<small>${esc(HINTS[g] || "")}</small></span></button>`).join("")}</div>
+    <button type="button" class="skip" id="skipBtn">Skip <kbd>0</kbd></button>`;
+  $("#panel").querySelectorAll("[data-g]").forEach(b => b.onclick = () => bonus(b.dataset.g));
+  $("#skipBtn").onclick = () => bonus(null);
+}
+
+function bonus(g) { if (phase !== "bonus") return; S.cur.grp = g; answer() }
+
+function answer() {
+  const { s, call, grp } = S.cur;
+  const isMet = s.group !== "Terrestrial";
+  const right = (call === "met") === isMet;
+  const grpRight = right && isMet && grp === s.group;
+  const entry = { s, call, grp, isMet, right, grpRight, pts: 0 };
+  S.log.push(entry);
+  markSeen(s);
+  recordAnswer(s.group, !right ? 0 : (isMet && !grpRight) ? 0.6 : 1);
+  if (S.mode === "test") {
+    phase = "logged"; S.i++;
+    if (S.i >= S.n) return finish();
+    S.lockUntil = performance.now() + 300;  // guards against a double tap answering the next rock
+    showRock(); hud("hRound");
+    return;
+  }
+  feedback(entry);
+}
+
+function feedback(e) {
+  phase = "reveal";
+  const { right, isMet, grpRight } = e;
+  let pts = 0;
+  if (right) {
+    S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak);
+    pts = LEARN_POINTS.correct + (grpRight ? LEARN_POINTS.bonus : 0);
+    if (S.streak >= 5) pts *= 2;
+  } else S.streak = 0;
+  e.pts = pts; S.score += pts;
+  hud(right ? "hScore" : "hStreak");
+  const [verdict, sub] = verdictOf(e);
+  $("#photo").insertAdjacentHTML("beforeend", `<div class="stamp ${right ? "ok" : "no"}">${isMet ? "Meteorite" : "Earth rock"}</div>`);
+  const last = S.i === S.n - 1;
+  $("#panel").innerHTML = `
+    <div class="result ${right ? "" : "wrong"}">
+      <div><div class="verdict">${esc(verdict)}</div><div class="verdict-sub">${esc(sub)}</div></div>
+      ${pts ? `<div class="points">+${pts}${S.streak >= 5 ? " (streak x2)" : ""}</div>` : ""}
+      ${factsHTML(e.s)}
+    </div>
+    <button type="button" class="next" id="nextBtn">${last ? "See results" : "Next rock"} <kbd>Enter</kbd></button>`;
+  $("#nextBtn").onclick = next;
+  $("#nextBtn").focus({ preventScroll: true });
+}
+
+function next() {
+  if (phase !== "reveal") return;
+  S.i++;
+  if (S.i >= S.n) finish(); else showRock();
+}
+
+function finish() { if (S.mode === "test") testReport(); else learnEnd() }
+
+function learnEnd() {
+  phase = "end";
+  const L = S.log, n = L.length || 1, right = L.filter(l => l.right).length;
+  const acc = Math.round(100 * right / n);
+  const missed = L.filter(l => !l.right && l.isMet).length, bagged = L.filter(l => !l.right && !l.isMet).length;
+  const metRight = L.filter(l => l.right && l.isMet), named = metRight.filter(l => l.grpRight).length;
+  const best = store.get(K.best, null), isBest = !best || S.score > best.score;
+  if (isBest) store.set(K.best, { score: S.score, acc });
+  const rank = acc >= 90 ? "Ready for the ice. Try Test mode and see what you score."
+    : acc >= 75 ? "Field-worthy. A few more rounds and nothing gets past you."
+    : acc >= 55 ? "Getting there. Study the misses below. Fusion crust is the key."
+    : "The ice is tricky. Review the misses and run another round.";
+  const review = L.filter(l => !l.right || (l.isMet && !l.grpRight));
+  app.innerHTML = `
+  <section class="end">
+    <div class="end-top">
+      <div><h2>${S.score} points${isBest && S.score > 0 ? `<br><em>New best</em>` : ""}</h2><div class="rank">${rank}</div></div>
+      <div class="stats">
+        <div class="stat"><b>${acc}%</b><span>called correctly (${right} of ${L.length})</span></div>
+        <div class="stat"><b>${S.bestStreak}</b><span>longest streak</span></div>
+        <div class="stat ${missed ? "warn" : ""}"><b>${missed}</b><span>meteorites left on the ice</span></div>
+        <div class="stat ${bagged ? "warn" : ""}"><b>${bagged}</b><span>Earth rocks bagged</span></div>
+      </div>
+    </div>
+    ${review.length ? `<div><h3>Review</h3><p class="sub">Misses and group mix-ups. Tap a photo to see what it was. Groups named this round: ${named} of ${metRight.length}.</p>${reviewHTML(review)}</div>` : ""}
+    ${notebookHTML()}
+    <div class="end-actions"><button class="go" id="againBtn" type="button">Another round</button><button class="ghost" id="homeBtn" type="button">Back to start</button></div>
+  </section>`;
+  wireReview(); wireNotebook();
+  $("#againBtn").onclick = newGame; $("#homeBtn").onclick = startScreen;
+  $("#hud").hidden = true; window.scrollTo(0, 0);
+}
+
+function testReport() {
+  phase = "end";
+  const L = S.log, mets = L.filter(l => l.isMet), terrs = L.filter(l => !l.isMet);
+  const found = mets.filter(l => l.right).length, rejected = terrs.filter(l => l.right).length, named = mets.filter(l => l.grpRight).length;
+  const possible = 2 * L.length + mets.length;
+  const score = possible ? Math.round(100 * (2 * (found + rejected) + named) / possible) : 0;
+  const tests = store.get(K.tests, []) || [];
+  const prevBest = tests.length ? Math.max(...tests.map(t => t.score)) : null;
+  const last = tests.length ? tests[tests.length - 1].score : null;
+  tests.push({ t: Date.now(), score, found, mets: mets.length, rejected, terrs: terrs.length, named });
+  store.set(K.tests, tests.slice(-50));
+  const d = last == null ? 0 : score - last;
+  const delta = prevBest == null ? "Your first test on record. Practise in Learn mode, then test again to watch this climb."
+    : score > prevBest ? `New best. Your previous best was ${prevBest}.`
+    : d > 0 ? `Up ${d} from your last test (${last}). Your best is ${prevBest}.`
+    : d < 0 ? `Down ${-d} from your last test (${last}). Your best is ${prevBest}.`
+    : `Same as your last test. Your best is ${prevBest}.`;
+  const band = score >= 90 ? "Ready for the ice" : score >= 75 ? "Field-worthy" : score >= 55 ? "Getting there" : "Keep practising";
+  const rows = ["Terrestrial", ...GROUPS].map(g => {
+    const ls = L.filter(l => l.s.group === g); if (!ls.length) return "";
+    const r = ls.filter(l => l.right).length, nm = ls.filter(l => l.grpRight).length;
+    return `<tr><th scope="row">${esc(groupLabel(g))}</th><td class="${r === ls.length ? "ok-txt" : "bad-txt"}">${r} of ${ls.length}</td>
+      <td>${g === "Terrestrial" ? "–" : `${nm} of ${ls.length}`}</td></tr>`;
+  }).join("");
+  const review = L.filter(l => !l.right || (l.isMet && !l.grpRight));
+  app.innerHTML = `
+  <section class="end">
+    <div class="end-top">
+      <div>
+        <div class="label">Test score</div>
+        <div class="score">${score}<small>/100</small></div>
+        <div class="band">${band}</div>
+        <div class="rank">${esc(delta)}</div>
+        ${tests.length > 1 ? `<div class="hist">${sparkline(tests.slice(-12).map(t => t.score))}<span>Your last ${Math.min(12, tests.length)} tests</span></div>` : ""}
+      </div>
+      <div class="stats">
+        <div class="stat ${found < mets.length ? "warn" : ""}"><b>${found}/${mets.length}</b><span>meteorites found</span></div>
+        <div class="stat ${rejected < terrs.length ? "warn" : ""}"><b>${rejected}/${terrs.length}</b><span>Earth rocks left on the ice</span></div>
+        <div class="stat"><b>${named}/${mets.length}</b><span>meteorite groups named</span></div>
+        <div class="stat"><b>${Math.round(100 * (found + rejected) / (L.length || 1))}%</b><span>right calls overall</span></div>
+      </div>
+    </div>
+    <div><h3>By group</h3><p class="sub">Right call means you bagged a meteorite or left an Earth rock behind.</p>
+      <div class="table-wrap"><table class="breakdown"><thead><tr><th scope="col">Group</th><th scope="col">Right call</th><th scope="col">Group named</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+    ${review.length ? `<div><h3>Review</h3><p class="sub">Every miss and group mix-up from this test. Tap a photo to see what it was.</p>${reviewHTML(review)}</div>` : ""}
+    ${notebookHTML()}
+    <div class="end-actions"><button class="go" id="againBtn" type="button">Take another test</button><button class="ghost" id="homeBtn" type="button">Back to start</button></div>
+  </section>`;
+  wireReview(); wireNotebook();
+  $("#againBtn").onclick = newGame; $("#homeBtn").onclick = startScreen;
+  $("#hud").hidden = true; window.scrollTo(0, 0);
+}
+
+function resetQuit() { const b = $("#quitBtn"); delete b.dataset.armed; b.textContent = "Quit" }
+$("#quitBtn").onclick = () => {
+  const b = $("#quitBtn");
+  if (b.dataset.armed) { resetQuit(); startScreen(); return }
+  b.dataset.armed = "1"; b.textContent = S?.mode === "test" ? "Quit test? Click again" : "Quit? Click again";
+  setTimeout(() => { if (b.dataset.armed) resetQuit() }, 3000);
+};
+
+document.addEventListener("keydown", e => {
+  if (e.metaKey || e.ctrlKey || e.altKey || $("#detail").open) return;
+  const k = e.key.toLowerCase();
+  if (phase === "guess") { if (k === "m") call("met"); else if (k === "e" || k === "t") call("ter") }
+  else if (phase === "bonus") {
+    if (k === "0" || k === "s") bonus(null);
+    else if (/^[1-9]$/.test(k) && GROUPS[+k - 1]) bonus(GROUPS[+k - 1]);
+  } else if (phase === "reveal" && (k === "enter" || k === " ")) { e.preventDefault(); next() }
+});
+
+if (!ALL.length) {
+  app.innerHTML = `<p>No samples loaded. Run <code>python3 scraper/scrape.py</code> to download the photo set into <code>quiz/</code>.</p>`;
+  return;
+}
+startScreen();
+})();
+</script>
+</body>
+</html>
