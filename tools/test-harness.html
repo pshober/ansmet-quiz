@@ -128,7 +128,9 @@ f.onload = async () => {
     if (scen === "adapt") {
       // Player is perfect on everything except carbonaceous chondrites (always called Earth rocks)
       // and Earth rocks are perfect. Compare what gets shown early vs late.
-      const strat = s => s.group === "Carbonaceous chondrite" ? { call: "ter" } : perfect(s);
+      // ?weak=<group>: the simulated player always gets that group wrong (default: carbonaceous)
+      const weak = P.get("weak") || "Carbonaceous chondrite";
+      const strat = s => s.group !== weak ? perfect(s) : weak === "Terrestrial" ? { call: "met" } : { call: "ter" };
       const per = [];
       for (let r = 0; r < +(P.get("rounds") || 12); r++) {
         if (r === 0) { pick("learn", 40); $("#goBtn").click() } else { $("#againBtn").click() }
@@ -136,6 +138,7 @@ f.onload = async () => {
       }
       const share = arr => { const c = {}; arr.forEach(g => c[g] = (c[g] || 0) + 1); const m = arr.filter(g => g !== "Terrestrial").length;
         return Object.fromEntries(Object.entries(c).map(([g, n]) => [g, g === "Terrestrial" ? (n / arr.length * 100).toFixed(0) + "% of all" : (n / m * 100).toFixed(0) + "% of mets"])) };
+      log("Earth rocks per 40-rock round:", per.map(r => r.filter(g => g === "Terrestrial").length).join(","));
       log("first 80 rocks:", JSON.stringify(share(per.slice(0, 2).flat())));
       log("after round 7:", per.slice(7).flat().length, "rocks", JSON.stringify(share(per.slice(7).flat())));
       log("notebook:", [...d.querySelectorAll(".notebook li")].map(li => li.textContent.replace(/\s+/g, " ").trim()).join(" | "));

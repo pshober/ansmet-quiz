@@ -16,7 +16,8 @@ Use the link above, or open `quiz/index.html` in a browser. It works offline too
 
 - **Learn mode**: answer, then see the classification, the curator's field description and a
   tip for that meteorite group. Groups you get wrong come up more often (gently: each group's share
-  stays between 0.5x and 2x its base share).
+  stays between 0.5x and 2x its base share). Earth rocks are never more than half of a round
+  (40–50%, an exact count per round), so the quiz never trains people to leave rocks on the ice.
 - **Test mode**: 30 rocks, the same mix every time, no feedback until the end. Scored out of 100
   (2 points per right call, 1 more for naming a meteorite's group), with a per-group breakdown
   and test history.

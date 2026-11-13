@@ -382,6 +382,9 @@ const MIX = {
   "Martian": 1
 };
 const TEST_LENGTH = 30;
+// Earth rocks are never more than half of what anyone sees, so the quiz doesn't teach people to leave
+// rocks on the ice. Learn rounds and tests both get an exact Earth-rock count, capped at this share.
+const MAX_EARTH = 0.5;
 const LEARN_POINTS = { correct: 100, bonus: 50 };
 
 const HINTS = {
@@ -425,7 +428,7 @@ const thumbOf = s => s.thumb || s.image;  // small version for grids and preview
 // ---- Adaptive practice ---------------------------------------------------------------------
 // Each group keeps a skill score from your answers; newer answers count more. In Learn mode,
 // groups you miss come up more and groups you've nailed come up less, within gentle bounds:
-// 0.5x to 2x their base MIX share, and the Earth-rock share stays between 40% and 60%.
+// 0.5x to 2x their base MIX share. The Earth-rock share stays between 40% and MAX_EARTH (50%).
 const DECAY = 0.9;               // weight left on older answers each time a group comes up again
 const PRIOR = { c: 3, n: 4 };    // every group starts at an assumed 75%, so a few answers can't swing it far
 const loadProgress = () => store.get(K.progress, {}) || {};
@@ -442,8 +445,10 @@ function terrestrialShare(prog) {
   const tot = mg.reduce((a, g) => a + MIX[g], 0) || 1;
   const metErr = mg.reduce((a, g) => a + MIX[g] * (1 - mastery(prog, g)), 0) / tot;
   const terErr = 1 - mastery(prog, "Terrestrial");
-  return Math.min(0.6, Math.max(0.4, MIX.Terrestrial / 100 + 0.4 * (terErr - metErr)));
+  return Math.min(MAX_EARTH, Math.max(0.4, MIX.Terrestrial / 100 + 0.4 * (terErr - metErr)));
 }
+// Exact number of Earth rocks in n rocks at a given share, never more than MAX_EARTH of them.
+const earthCount = (n, share) => Math.min(Math.floor(n * MAX_EARTH), Math.round(n * share));
 
 // ---- Photo piles: unseen photos first, so the same photo rarely repeats ---------------------
 function makePiles() {
@@ -458,12 +463,12 @@ function markSeen(s) {
   seen.push(s.id);
   store.set(K.seen, seen.slice(-Math.floor(ALL.length * 0.8)));
 }
-function drawAdaptive(piles) {
+function drawAdaptive(piles, wantEarth) {
   const prog = loadProgress();
   const has = g => piles[g] && piles[g].length;
-  if (Math.random() < terrestrialShare(prog) && has("Terrestrial")) return piles.Terrestrial.pop();
+  if (wantEarth && has("Terrestrial")) return piles.Terrestrial.pop();
   const live = GROUPS.filter(g => has(g) && (MIX[g] ?? 1) > 0);
-  if (!live.length) return has("Terrestrial") ? piles.Terrestrial.pop() : null;
+  if (!live.length) return null;
   const w = adaptiveShares(prog, live);
   let r = Math.random();
   for (let i = 0; i < live.length; i++) { r -= w[i]; if (r <= 0) return piles[live[i]].pop() }
@@ -478,16 +483,23 @@ function adaptiveShares(prog, groups) {
   for (let k = 0; k < 8; k++) s = norm(s.map((x, i) => Math.min(2 * b0[i], Math.max(0.5 * b0[i], x))));
   return s;
 }
-// Test mode: the same composition every time (largest-remainder split of MIX), so scores compare.
+// Test mode: the same composition every time, so scores compare. Earth rocks get their (capped) count,
+// then the remaining rocks are split across meteorite groups by MIX (largest remainder).
+const testEarthCount = () => earthCount(TEST_LENGTH, MIX.Terrestrial / 100);
+function testSplit(metGroups, tieNoise) {
+  const n = TEST_LENGTH - testEarthCount(), tot = metGroups.reduce((a, g) => a + MIX[g], 0);
+  const parts = metGroups.map(g => { const x = n * MIX[g] / tot, k = Math.floor(x); return { g, k, r: +(x - k).toFixed(6) + (tieNoise ? Math.random() * 1e-7 : 0) } });
+  const left = n - parts.reduce((a, p) => a + p.k, 0);
+  if (tieNoise) [...parts].sort((a, b) => b.r - a.r).slice(0, left).forEach(p => p.k++);
+  return Object.assign(parts, { left });
+}
 function drawTestDeck(piles) {
   const groups = ["Terrestrial", ...GROUPS].filter(g => piles[g]?.length && (MIX[g] ?? 0) > 0);
-  const tot = groups.reduce((a, g) => a + MIX[g], 0);
-  const parts = groups.map(g => { const x = TEST_LENGTH * MIX[g] / tot; return { g, k: Math.floor(x), r: x - Math.floor(x) + Math.random() * 1e-6 } });
-  const left = TEST_LENGTH - parts.reduce((a, p) => a + p.k, 0);
-  [...parts].sort((a, b) => b.r - a.r).slice(0, left).forEach(p => p.k++);
+  const parts = testSplit(groups.filter(g => g !== "Terrestrial"), true);
   const deck = [];
+  for (let i = 0; i < testEarthCount() && piles.Terrestrial?.length; i++) deck.push(piles.Terrestrial.pop());
   for (const p of parts) for (let i = 0; i < p.k; i++) {
-    const s = piles[p.g].pop() || piles["Ordinary chondrite"]?.pop() || piles.Terrestrial?.pop();
+    const s = piles[p.g].pop() || piles["Ordinary chondrite"]?.pop();  // never tops up with Earth rocks
     if (s) deck.push(s);
   }
   return shuffle(deck);
@@ -511,7 +523,9 @@ function notebookHTML() {
     const p = prog[g], seen = p?.seen || 0, enough = seen >= 3;
     const acc = p && p.n > 0 ? p.c / p.n : 0, pct = Math.round(acc * 100), b = boost(prog, g);
     const cls = acc >= 0.85 ? "hi" : acc >= 0.65 ? "mid" : "lo";
-    const focus = !seen ? "" : b >= 1.25 ? `<span class="nb-focus more">extra practice</span>` : b <= 0.75 ? `<span class="nb-focus less">shown less</span>` : "";
+    // Earth rocks can only go down from half (MAX_EARTH), so they're never marked "extra practice"
+    const focus = !seen ? "" : g === "Terrestrial" ? (terrestrialShare(prog) <= 0.45 ? `<span class="nb-focus less">shown less</span>` : "")
+      : b >= 1.25 ? `<span class="nb-focus more">extra practice</span>` : b <= 0.75 ? `<span class="nb-focus less">shown less</span>` : "";
     const lvl = enough ? `${pct}%` : seen ? `${seen} seen` : "Not seen yet";
     return `<li><span class="nb-name">${esc(groupLabel(g))}</span>
       <span class="nb-bar" role="img" aria-label="${esc(groupLabel(g))}: ${esc(lvl)}"><i class="${cls}" style="width:${enough ? pct : 0}%"></i></span>
@@ -667,6 +681,8 @@ function startScreen() {
 function newGame() {
   const piles = makePiles();
   S = { mode, piles, deck: [], n: length, i: 0, score: 0, streak: 0, bestStreak: 0, log: [], lockUntil: 0 };
+  const k = earthCount(length, terrestrialShare(loadProgress()));
+  S.earth = shuffle(Array.from({ length }, (_, i) => i < k));  // which rocks in this Learn round are Earth rocks
   if (mode === "test") { S.deck = drawTestDeck(piles); S.n = S.deck.length }
   $("#hud").hidden = false;
   $("#cMode").textContent = mode === "test" ? "Test" : "Learn";
@@ -684,7 +700,7 @@ function hud(bump) {
 
 function showRock() {
   phase = "guess";
-  if (!S.deck[S.i]) S.deck[S.i] = drawAdaptive(S.piles);
+  if (!S.deck[S.i]) S.deck[S.i] = drawAdaptive(S.piles, S.earth[S.i]);
   const s = S.deck[S.i];
   if (!s) return finish();
   S.cur = { s, call: null, grp: null };
@@ -701,7 +717,7 @@ function showRock() {
   wirePhoto($("#photo"));
   $("#btnMet").onclick = () => call("met");
   $("#btnTer").onclick = () => call("ter");
-  if (S.i + 1 < S.n && !S.deck[S.i + 1]) S.deck[S.i + 1] = drawAdaptive(S.piles);
+  if (S.i + 1 < S.n && !S.deck[S.i + 1]) S.deck[S.i + 1] = drawAdaptive(S.piles, S.earth[S.i + 1]);
   preload(S.deck[S.i + 1]);
 }
 
@@ -1031,14 +1047,11 @@ const COLLECTED_DOM = { "Terrestrial": 33, "Ordinary chondrite": 3316, "Carbonac
   "Other achondrite": 12, "Lunar": 8, "Iron": 6, "Enstatite chondrite": 4, "Stony-iron": 1, "Martian": 0 };
 // Rocks per group in every test, worked out the same way drawTestDeck() does (ties shown as a range).
 function testPlan() {
-  const groups = ["Terrestrial", ...GROUPS].filter(g => (MIX[g] ?? 0) > 0);
-  const tot = groups.reduce((a, g) => a + MIX[g], 0);
-  const parts = groups.map(g => { const x = TEST_LENGTH * MIX[g] / tot, k = Math.floor(x); return { g, k, r: +(x - k).toFixed(6) } });
-  const left = TEST_LENGTH - parts.reduce((a, p) => a + p.k, 0);
+  const parts = testSplit(GROUPS.filter(g => (MIX[g] ?? 0) > 0), false), left = parts.left;
   const cut = left > 0 ? parts.map(p => p.r).sort((a, b) => b - a)[left - 1] : Infinity;
   const above = parts.filter(p => p.r > cut).length, tied = parts.filter(p => p.r === cut && p.r > 0).length;
-  return Object.fromEntries(parts.map(p => [p.g, p.r > cut || (p.r === cut && p.r > 0 && tied === left - above) ? `${p.k + 1}`
-    : p.r === cut && p.r > 0 ? `${p.k}–${p.k + 1}` : `${p.k}`]));
+  return Object.fromEntries([["Terrestrial", `${testEarthCount()}`], ...parts.map(p => [p.g, p.r > cut || (p.r === cut && p.r > 0 && tied === left - above) ? `${p.k + 1}`
+    : p.r === cut && p.r > 0 ? `${p.k}–${p.k + 1}` : `${p.k}`])]);
 }
 function howScreen() {
   phase = "how"; S = null; $("#hud").hidden = true;
@@ -1056,13 +1069,14 @@ function howScreen() {
     <h3>Learn mode adapts to you</h3>
     <ul>
       <li>It starts from the shares above, then adjusts after every answer.</li>
-      <li>Groups you miss come up more often; groups you get right come up less. Each group stays between half and double its starting share, and Earth rocks stay between 40% and 60% of rocks.</li>
+      <li>Groups you miss come up more often; groups you get right come up less. Each group stays between half and double its starting share.</li>
+      <li>Earth rocks are never more than half of a round: between 40% and 50%, set at the start of each round, so the quiz never trains you to leave rocks on the ice.</li>
       <li>Your skill per group weighs recent answers most and starts from an assumed 75%, so a few lucky or unlucky answers don't swing it far.</li>
       <li>Photos you haven't seen yet, in the quiz or the album, come first.</li>
     </ul>
     <h3>Test mode doesn't</h3>
     <ul>
-      <li>Every test is ${TEST_LENGTH} rocks in the same mix (column above), so your scores compare from one test to the next.</li>
+      <li>Every test is ${TEST_LENGTH} rocks in the same mix (column above), so your scores compare from one test to the next. Exactly half are Earth rocks.</li>
       <li>No feedback until the end, then a review of everything you missed.</li>
       <li>Score: 2 points for each right call (meteorite or Earth rock), 1 more for naming a meteorite's group, scaled to 100.</li>
     </ul>
