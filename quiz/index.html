@@ -281,6 +281,13 @@ dialog.viewer:focus { outline: none }
 .v-close { position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); z-index: 3; background: var(--ink); color: var(--ice); border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 600 }
 body:has(dialog[open]) { overflow: hidden }
 
+/* How the quiz works */
+.how-link { color: var(--flag); font-weight: 600; font-size: 14px; display: inline-block; margin: -8px 0 18px }
+.how-page h3 { font-family: var(--f-display); font-size: 24px; font-weight: 700; text-transform: uppercase; margin: 8px 0 0 }
+.how-page ul { margin: 0; padding-left: 1.2em; max-width: 70ch; display: grid; gap: 6px }
+.how-page .sub { font-size: 13px; color: var(--ink-soft); margin: 0; max-width: 80ch }
+.how-page .table-wrap { max-width: 820px }
+
 footer { font-size: 12px; color: var(--ink-soft); max-width: 90ch }
 footer a { color: inherit }
 
@@ -627,6 +634,7 @@ function startScreen() {
         </div>
       </div>
       <ul class="how" id="howList">${howHTML()}</ul>
+      <a class="how-link" href="#how">How the mix and scoring work →</a>
       <div class="start-actions">
         <button class="go" id="goBtn" type="button">${mode === "test" ? "Start test" : "Start learning"}</button>
         <a class="album-btn" href="#album">${ALBUM_ICON}See the meteorites</a>
@@ -1017,12 +1025,61 @@ function stepViewer(d) { const j = V.i + d; if (j >= 0 && j < V.list.length) { V
   window.addEventListener("popstate", () => { if (d.open) { V.popping = true; d.close() } });
 })();
 
-// #album and #album-<type> open the album; anything else is the quiz.
+// ---- How the quiz works ---------------------------------------------------------------------
+// Dominion Range samples in the NASA JSC database (Nov 2026): what was actually collected there.
+const COLLECTED_DOM = { "Terrestrial": 33, "Ordinary chondrite": 3316, "Carbonaceous chondrite": 63, "HED achondrite": 26,
+  "Other achondrite": 12, "Lunar": 8, "Iron": 6, "Enstatite chondrite": 4, "Stony-iron": 1, "Martian": 0 };
+// Rocks per group in every test, worked out the same way drawTestDeck() does (ties shown as a range).
+function testPlan() {
+  const groups = ["Terrestrial", ...GROUPS].filter(g => (MIX[g] ?? 0) > 0);
+  const tot = groups.reduce((a, g) => a + MIX[g], 0);
+  const parts = groups.map(g => { const x = TEST_LENGTH * MIX[g] / tot, k = Math.floor(x); return { g, k, r: +(x - k).toFixed(6) } });
+  const left = TEST_LENGTH - parts.reduce((a, p) => a + p.k, 0);
+  const cut = left > 0 ? parts.map(p => p.r).sort((a, b) => b - a)[left - 1] : Infinity;
+  const above = parts.filter(p => p.r > cut).length, tied = parts.filter(p => p.r === cut && p.r > 0).length;
+  return Object.fromEntries(parts.map(p => [p.g, p.r > cut || (p.r === cut && p.r > 0 && tied === left - above) ? `${p.k + 1}`
+    : p.r === cut && p.r > 0 ? `${p.k}–${p.k + 1}` : `${p.k}`]));
+}
+function howScreen() {
+  phase = "how"; S = null; $("#hud").hidden = true;
+  const plan = testPlan(), total = Object.values(COLLECTED_DOM).reduce((a, b) => a + b, 0);
+  const pct = n => { const v = 100 * n / total; return n === 0 ? "none" : v < 0.1 ? "<0.1%" : v < 1 ? v.toFixed(1) + "%" : Math.round(v) + "%" };
+  const rows = ["Terrestrial", ...GROUP_ORDER].filter(g => MIX[g] != null).map(g => `<tr><th scope="row">${esc(groupLabel(g))}</th>
+    <td>${MIX[g]}%</td><td>${plan[g] ?? "0"}</td><td>${pct(COLLECTED_DOM[g] || 0)}</td></tr>`).join("");
+  app.innerHTML = `
+  <section class="gallery how-page">
+    <div class="g-top"><button type="button" class="ghost" id="hBack">← Back to the quiz</button></div>
+    <div class="g-head"><h2>How the quiz works</h2>
+      <p class="g-intro">The quiz shows far more Earth rocks and rare meteorites than you'll find on the ice, on purpose, so you get enough practice with each kind. <strong>These are not the real ratios.</strong> On the ice, almost everything you'll find is an ordinary chondrite.</p></div>
+    <div class="table-wrap"><table class="breakdown"><thead><tr><th scope="col">Group</th><th scope="col">Learn mode, at start</th><th scope="col">Each test (30 rocks)</th><th scope="col">Real: Dominion Range</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="sub">Collected: all ${total.toLocaleString()} Dominion Range samples in the NASA JSC Antarctic Meteorite database. Earth rocks there are only the ones bagged by mistake; most are left on the ice.</p>
+    <h3>Learn mode adapts to you</h3>
+    <ul>
+      <li>It starts from the shares above, then adjusts after every answer.</li>
+      <li>Groups you miss come up more often; groups you get right come up less. Each group stays between half and double its starting share, and Earth rocks stay between 40% and 60% of rocks.</li>
+      <li>Your skill per group weighs recent answers most and starts from an assumed 75%, so a few lucky or unlucky answers don't swing it far.</li>
+      <li>Photos you haven't seen yet, in the quiz or the album, come first.</li>
+    </ul>
+    <h3>Test mode doesn't</h3>
+    <ul>
+      <li>Every test is ${TEST_LENGTH} rocks in the same mix (column above), so your scores compare from one test to the next.</li>
+      <li>No feedback until the end, then a review of everything you missed.</li>
+      <li>Score: 2 points for each right call (meteorite or Earth rock), 1 more for naming a meteorite's group, scaled to 100.</li>
+    </ul>
+    <h3>Field notebook</h3>
+    <ul><li>Shows your recent accuracy for each group, from both modes. A meteorite counts fully only when you also name its group. It's saved in your own browser.</li></ul>
+    <p class="sub">An unofficial study aid, not an ANSMET or NASA product.</p>
+  </section>`;
+  $("#hBack").onclick = leaveAlbum;
+}
+
+// #album and #album-<type> open the album; #how explains the quiz; anything else is the quiz.
 function route() {
   const h = decodeURIComponent(location.hash.replace(/^#/, ""));
   if (h === "album") { albumHome(); window.scrollTo(0, 0); return true }
+  if (h === "how") { howScreen(); window.scrollTo(0, 0); return true }
   if (h.startsWith("album-") && SLUG2G[h.slice(6)]) { albumView(SLUG2G[h.slice(6)]); window.scrollTo(0, 0); return true }
-  if (phase === "album") { startScreen(); return true }
+  if (phase === "album" || phase === "how") { startScreen(); return true }
   return false;
 }
 window.addEventListener("hashchange", route);

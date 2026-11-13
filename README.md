@@ -21,6 +21,8 @@ Use the link above, or open `quiz/index.html` in a browser. It works offline too
   (2 points per right call, 1 more for naming a meteorite's group), with a per-group breakdown
   and test history.
 - **Field notebook**: recent accuracy per group, across both modes.
+- **How the quiz works** (`#how`): the mix in each mode next to what was really collected at the
+  Dominion Range, and how Learn mode adapts. Built from the same settings the quiz uses.
 - **See the meteorites**: a photo album for each meteorite type (and Earth rocks), grouped by
   subtype, e.g. pallasites vs mesosiderites. Tap a photo for a large view with the curator's notes;
   arrows or swipe to move through the album. The common types open on a representative 60 photos
