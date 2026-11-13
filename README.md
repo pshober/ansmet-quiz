@@ -59,7 +59,10 @@ features rather than memorising individual photos. Current pool: 1,198 photos (1
 ## Tuning the mix
 
 How often each group appears is set by `MIX` near the top of the script in `quiz/index.html`
-(percent of rocks shown). The photo pool doesn't need to change when you retune it.
+(percent of rocks shown). The photo pool doesn't need to change when you retune it. Two more
+settings sit next to it: `MAX_EARTH` (0.5) caps Earth rocks at half of any Learn round or test,
+and `TEST_LENGTH` (30) is the number of rocks in a test. The "How the quiz works" page reads all
+three, so it stays in step.
 
 ## Rebuilding the data
 
@@ -83,9 +86,12 @@ google-chrome --headless=new --virtual-time-budget=120000 --dump-dom \
   "http://127.0.0.1:8000/tools/test-harness.html?s=learn"
 ```
 
-Scenarios: `s=learn`, `s=test` (three tests in a row), `s=adapt&rounds=12` (checks the adaptive mix),
-`s=album` (every album, the viewer, show-all and navigation) and `s=deeplink&hash=album-iron`.
-Each ends with `page errors: none` when all is well.
+Scenarios: `s=learn` and `s=test` (rounds with all three kinds of mistake, then the review and
+viewer), `s=adapt&rounds=12` (the adaptive mix; add `&weak=Terrestrial` or another group to play
+someone who always misses it, and check Earth rocks never pass half a round), `s=album` (every
+album, the viewer, show-all and navigation) and `s=deeplink&hash=album-iron` (or `hash=how`).
+Each ends with `page errors: none` when all is well. `s=rshot` stops on a test report with a full
+review, for screenshots.
 
 The link-preview card (`quiz/og-card.jpg`) comes from `tools/og-card.html`: screenshot it at
 1200 x 800 in Chrome and keep the top 1200 x 630.
@@ -95,7 +101,9 @@ The link-preview card (`quiz/og-card.jpg`) comes from `tools/og-card.html`: scre
 Pushing to `main` deploys the `quiz/` folder to GitHub Pages
 ([`.github/workflows/pages.yml`](.github/workflows/pages.yml)). GitHub serves it at
 planetarypat.com/ansmet-quiz/ because planetarypat.com is the custom domain of the
-`pshober.github.io` user site. Nothing in that site's repo needs to change.
+`pshober.github.io` user site. Changing the quiz never needs a change there. The site links to the
+quiz from a penguin badge (bottom right, above "My asteroid") and a "Meteorite quiz" footer link,
+both in the `pshober.github.io` repo.
 
 Field photos courtesy of the ANSMET program (Case Western Reserve University and the University
 of Utah), via NASA JSC Astromaterials Curation.
